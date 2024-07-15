@@ -8,6 +8,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
+    """This function calculates the difference between two rgb images"""
+    delta = np.zeros_like(ref_img, dtype=np.int8)
+    ref_img = ref_img.astype(np.int8)
+    orig_img = orig_img.astype(np.int8)
+    for i in range(3):
+        # print(f"{image1[:, :, i] = }")
+        # print(f"{image2[:, :, i] = }")
+        delta[:, :, i] = orig_img[:, :, i] - ref_img[:, :, i]
+        # print(f"{delta[:, :, i] = }")
+        # assert False
+    return delta
+
+
 def read_rgb_img(path) -> np.array:
     assert os.path.exists(path), "provided path does not exist!"
     bgr_img = cv2.imread(path, cv2.COLOR_BGR2RGB)

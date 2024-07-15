@@ -1,4 +1,6 @@
-from utils.dataset_utils import OriginalDataset
+import numpy as np
+
+from utils.dataset_utils import OriginalDataset, delta_between_images
 
 
 class TensorStorage(dict):
@@ -21,7 +23,13 @@ class TensorStorage(dict):
             self[idx] = self.original_dataset[idx]
         else:
             """@todo here we need to perform some encoding and store the encoded tensor"""
-            pass
+            print(f"{idx = }")
+            ref_img = self[idx // self.checkpoint]
+            orig_img = self.original_dataset[idx]
+            delta = delta_between_images(ref_img, orig_img)
+            # print(f"{delta = }")
+            # print(f"fraction of zero deltas: {np.count_nonzero(delta==0)/len(np.ndarray.flatten(delta)) = }")
+            self[idx] = delta
 
     def get_image(self, idx):
         """Here we need to reconstruct the original image and also verify that it is correct by
@@ -30,6 +38,9 @@ class TensorStorage(dict):
                                  f"available indices are {self.keys()}")
         if idx % self.checkpoint == 0:
             return self[idx]
+        else:
+            # print(f"{self[idx // self.checkpoint][0,0,-1]} + {self[idx][0,0,-1]}")
+            return self[idx // self.checkpoint] + self[idx]
 
     def get_size(self):
         pass
@@ -40,7 +51,13 @@ if __name__ == "__main__":
     img_0 = original_dataset_[0]
     tensor_storage = TensorStorage(checkpoint=10,
                                    original_dataset=original_dataset_)
-    tensor_storage.add()
+    for idx in range(3):
+        tensor_storage.add()
     print(tensor_storage)
     img_0 = tensor_storage.get_image(0)
     print(f'{img_0.shape = }')
+    img_1 = tensor_storage.get_image(1)
+    img_1_original = original_dataset_[1]
+    print(f"{img_1[0,0,-1] = }")
+    print(f"{img_1_original[0,0,-1] = }")
+    assert np.array_equal(img_1, img_1_original), "The original image and reconstructed img dont match!"
