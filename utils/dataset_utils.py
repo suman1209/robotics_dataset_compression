@@ -1,11 +1,10 @@
-import numpy as np
+from matplotlib.ticker import PercentFormatter
 from torchvision.datasets import VisionDataset
 import os
-
 import cv2
-import numpy
 import matplotlib.pyplot as plt
 import numpy as np
+from utils.utils import get_storage
 
 
 def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
@@ -38,6 +37,24 @@ def plot_image(image_path, figsize=(10, 10)):
     plt.show()
 
 
+def plot_image_array(image_array: np.array, figsize=(10, 10)):
+    title = "image_array" + f"_{image_array.shape}"
+    plt.figure(figsize=figsize)
+    plt.title(title)
+    plt.imshow(abs(image_array))
+    plt.show()
+
+
+def plot_hist_array(hist_array: np.array, figsize=(10, 10)):
+    title = "hist_array" + f"_{hist_array.shape}"
+    data = np.ndarray.flatten(hist_array.flatten())
+    plt.figure(figsize=figsize)
+    plt.title(title)
+    plt.hist(data, weights=np.ones(len(data)) / len(data))
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
+    plt.show()
+
+
 class OriginalDataset(VisionDataset):
     def __init__(self, data_path: str):
         super(OriginalDataset, self).__init__()
@@ -64,8 +81,17 @@ class OriginalDataset(VisionDataset):
     def __str__(self):
         return f"OriginalDataset({self.data_path})"
 
+    def get_storage_size(self):
+        "returns the total storage size of the dataset"
+        total_storage = 0
+        for data in self:
+            total_storage += get_storage(data)
+        return total_storage
+
 
 if __name__ == '__main__':
     original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures')
     len_ = (original_dataset.__len__())
     print(len_)
+    storage_size = original_dataset.get_storage_size()
+    print(f"{storage_size = }")

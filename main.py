@@ -1,6 +1,9 @@
 import numpy as np
-
-from utils.dataset_utils import OriginalDataset, delta_between_images
+from utils.utils import get_storage
+from utils.dataset_utils import (OriginalDataset,
+                                 delta_between_images,
+                                 plot_image_array,
+                                 plot_hist_array)
 
 
 class TensorStorage(dict):
@@ -23,7 +26,6 @@ class TensorStorage(dict):
             self[idx] = self.original_dataset[idx]
         else:
             """@todo here we need to perform some encoding and store the encoded tensor"""
-            print(f"{idx = }")
             ref_img = self[idx // self.checkpoint]
             orig_img = self.original_dataset[idx]
             delta = delta_between_images(ref_img, orig_img)
@@ -43,7 +45,16 @@ class TensorStorage(dict):
             return self[idx // self.checkpoint] + self[idx]
 
     def get_size(self):
-        pass
+        total_size = 0
+        for idx, array in self.items():
+            total_size += get_storage(array)
+        return total_size
+
+    def plot_img(self, idx):
+        plot_image_array(self[idx])
+
+    def plot_hist(self, idx):
+        plot_hist_array(self[idx])
 
 
 if __name__ == "__main__":
@@ -51,7 +62,7 @@ if __name__ == "__main__":
     img_0 = original_dataset_[0]
     tensor_storage = TensorStorage(checkpoint=10,
                                    original_dataset=original_dataset_)
-    for idx in range(3):
+    for idx in range(len(original_dataset_)):
         tensor_storage.add()
     print(tensor_storage)
     img_0 = tensor_storage.get_image(0)
@@ -61,3 +72,10 @@ if __name__ == "__main__":
     print(f"{img_1[0,0,-1] = }")
     print(f"{img_1_original[0,0,-1] = }")
     assert np.array_equal(img_1, img_1_original), "The original image and reconstructed img dont match!"
+    print(f"total size in MB of tensor storage: {tensor_storage.get_size()}")
+    print(f"total size in MB of original dataset: {original_dataset_.get_storage_size()}")
+
+    # plot a decoded image
+
+    tensor_storage.plot_img(0)
+    tensor_storage.plot_hist(1)
