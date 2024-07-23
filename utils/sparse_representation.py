@@ -12,8 +12,8 @@ class SparseRepresentation:
         """
          e.g. delta_image    : [[[0, -2, 0], [1, 0, 0]],
                                 [[0, 0, 0], [110, -50, 0]]]
-              output_format: [(img_height, img_width, 3), (row_num, col_num, channel_num, delta_value) ...]
-              expected_output: [(2, 2, 3), (0, 0, [0, -2, 0]), (0, 1, [1, 0, 0]),
+              output_format: [(row_num, col_num, [r_delta, g_delta, b_delta]) ...]
+              expected_output: [(0, 0, [0, -2, 0]), (0, 1, [1, 0, 0]),
                                            (1, 0, [110, -50, 0])]
         """
         sparse_matrix = []
