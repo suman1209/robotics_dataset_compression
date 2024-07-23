@@ -4,6 +4,7 @@ from utils.dataset_utils import (OriginalDataset,
                                  delta_between_images,
                                  plot_image_array,
                                  plot_hist_array)
+from utils.sparse_representation import SparseRepresentation
 
 
 class TensorStorage(dict):
@@ -22,6 +23,7 @@ class TensorStorage(dict):
     def add(self):
         """this function adds the data to the dictionary"""
         idx = len(self)
+        self.sp = SparseRepresentation(img_shape=self.original_dataset[0].shape)
         if idx % self.checkpoint == 0:
             self[idx] = self.original_dataset[idx]
         else:
@@ -29,8 +31,7 @@ class TensorStorage(dict):
             ref_img = self[idx // self.checkpoint]
             orig_img = self.original_dataset[idx]
             delta = delta_between_images(ref_img, orig_img)
-            # print(f"{delta = }")
-            # print(f"fraction of zero deltas: {np.count_nonzero(delta==0)/len(np.ndarray.flatten(delta)) = }")
+            self.sp.get_sparse_representation(delta)
             self[idx] = delta
 
     def get_image(self, idx):
