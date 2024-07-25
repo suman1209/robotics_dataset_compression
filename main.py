@@ -1,8 +1,10 @@
 import numpy as np
+import time
 from utils.utils import get_storage
 from utils.dataset_utils import (OriginalDataset,
                                  delta_between_images,
                                  plot_image_array,
+                                 print_image_array,
                                  plot_hist_array)
 
 
@@ -15,9 +17,10 @@ class TensorStorage(dict):
         checkpoint : (int) how often to store the reference frame
         original_dataset: (OriginalDataset) the original dataset
         """
-        super().__init__()
+        super().__init__(self)
         self.checkpoint = checkpoint
         self.original_dataset = original_dataset
+        self.enlarge_factor = 35
 
     def add(self):
         """this function adds the data to the dictionary"""
@@ -56,15 +59,27 @@ class TensorStorage(dict):
     def plot_hist(self, idx):
         plot_hist_array(self[idx])
 
+    def plot_modified_image(self, idx):
+        delta_image = self[idx]
+        delta_image[delta_image != 0]*=self.enlarge_factor
+        plot_image_array(delta_image)
+
+    def printImageArray(self,idx):
+        delta_image = self[idx]
+        delta_image[delta_image != 0]*=self.enlarge_factor
+        print("shape of delta image: ",delta_image.shape )
+        print_image_array(delta_image)
+
+
 
 if __name__ == "__main__":
-    original_dataset_ = OriginalDataset(data_path="./datasets/droid_100_sample_pictures")
+    original_dataset_ = OriginalDataset(data_path="droid_100_sample_pictures")
     img_0 = original_dataset_[0]
-    tensor_storage = TensorStorage(checkpoint=10,
+    tensor_storage = TensorStorage(checkpoint=20,
                                    original_dataset=original_dataset_)
     for idx in range(len(original_dataset_)):
         tensor_storage.add()
-    print(tensor_storage)
+    #print(tensor_storage)
     img_0 = tensor_storage.get_image(0)
     print(f'{img_0.shape = }')
     img_1 = tensor_storage.get_image(1)
@@ -76,6 +91,6 @@ if __name__ == "__main__":
     print(f"total size in MB of original dataset: {original_dataset_.get_storage_size()}")
 
     # plot a decoded image
-
-    tensor_storage.plot_img(0)
-    tensor_storage.plot_hist(1)
+    tensor_storage.plot_modified_image(4)
+    tensor_storage.printImageArray(4)
+    #tensor_storage.plot_hist(2)
