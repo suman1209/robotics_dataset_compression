@@ -33,7 +33,7 @@ def read_rgb_img(path) -> np.array:
     return rgb_img
 
 
-def plot_image(image_path, figsize=(10, 10)):
+def plot_image(image_path, figsize=(5, 5)):
     img = read_rgb_img(image_path)
     title = str(image_path) + f"_{img.shape}"
     plt.figure(figsize=figsize)
@@ -42,14 +42,14 @@ def plot_image(image_path, figsize=(10, 10)):
     plt.show()
 
 
-def plot_image_array(image_array: np.array, figsize=(10, 10)):
+def plot_image_array(image_array: np.array, figsize=(5, 5)):
     title = "image_array" + f"_{image_array.shape}"
     plt.figure(figsize=figsize)
     plt.title(title)
     plt.imshow(abs(image_array))
     plt.show()
 
-def plot_modified_image_array(image_array: np.array,pixel_count, figsize=(10, 10)):
+def plot_modified_image_array(image_array: np.array,pixel_count, figsize=(5, 5)):
     total_pixels = image_array.shape[0] * image_array.shape[1]
     title = ("image_array" + f"_{image_array.shape}" +
              f"num_white_pixels(non[0, 0, 0])_{round((pixel_count/total_pixels)*100, 2)} %")
@@ -58,7 +58,7 @@ def plot_modified_image_array(image_array: np.array,pixel_count, figsize=(10, 10
     plt.imshow(abs(image_array))
     plt.show()
 
-def plot_hist_array(hist_array: np.array, figsize=(10, 10)):
+def plot_hist_array(hist_array: np.array, figsize=(5, 5)):
     title = "hist_array" + f"_{hist_array.shape}"
     data = np.ndarray.flatten(hist_array.flatten())
     plt.figure(figsize=figsize)

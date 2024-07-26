@@ -170,7 +170,7 @@ if __name__ == "__main__":
     tensor_storage = TensorStorage(checkpoint=10,
                                    original_dataset=original_dataset_,
                                    encoding_scheme="delta",
-                                   enlarge_factor=10)
+                                   enlarge_factor=20)
     # num_images = len(original_dataset_)
     num_images = 12
     print(f"#### Compressing and storing {num_images} images #### ")
@@ -213,12 +213,13 @@ if __name__ == "__main__":
 
     # plot a decoded image
 
-    # tensor_storage.plot_img(0)
-    # tensor_storage.plot_hist(1)
+    image = tensor_storage.decompress_img(5)
+    tensor_storage.plot_img(image)
+    tensor_storage.plot_hist(1)
 
 
-    tensor_storage.plot_modified_image(2)
-    tensor_storage.plot_white_pixels_image(2) #plots non-negative delta values replaced with white pixel values
+    #tensor_storage.plot_modified_image(2)
+    #tensor_storage.plot_white_pixels_image(2) #plots non-negative delta values replaced with white pixel values
     # tensor_storage.printImageArray(1)
 
-    # tensor_storage.plot_encoded_data_sizes()
+    tensor_storage.plot_encoded_data_sizes()
