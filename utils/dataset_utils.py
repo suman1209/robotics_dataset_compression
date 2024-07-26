@@ -9,17 +9,12 @@ from utils.utils import get_storage
 
 def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
     """This function calculates the difference between two rgb images"""
-    assert ref_img.shape == orig_img.shape, (f"ref({ref_img.shape}) and"
-                                             f" orig({orig_img.shape}) images must have the same shape")
-    # TODO, need to debug why the orig18 and recon18 are not matching when the dtypes are set to int8
-    delta = np.zeros_like(ref_img, dtype=np.float32)
-    ref_img = ref_img.astype(np.float32)
-    orig_img = orig_img.astype(np.float32)
+    delta = np.zeros_like(ref_img, dtype=np.int8)
+    ref_img = ref_img.astype(np.int8)
+    orig_img = orig_img.astype(np.int8)
     for i in range(3):
         # print(f"{image1[:, :, i] = }")
         # print(f"{image2[:, :, i] = }")
-        if orig_img[7, 194, 0] == 41:
-            pass
         delta[:, :, i] = orig_img[:, :, i] - ref_img[:, :, i]
         # print(f"{delta[:, :, i] = }")
         # assert False
