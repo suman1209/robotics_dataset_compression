@@ -68,29 +68,23 @@ class TensorStorage(dict):
 
     def printImageArray(self,idx):
         delta_image = self[idx]
-        delta_image[delta_image != 0]*=self.enlarge_factor
+        delta_image[delta_image != 0] *=s elf.enlarge_factor
         print("shape of delta image: ",delta_image.shape )
         print_image_array(delta_image)
 
 
     def plot_modified_image(self, idx):
         delta_image = self[idx]
-        delta_image[delta_image != 0]*=self.enlarge_factor
+        delta_image[delta_image != 0] *= self.enlarge_factor
         plot_image_array(delta_image)
 
-    def printImageArray(self,idx):
-        delta_image = self[idx]
-        delta_image[delta_image != 0]*=self.enlarge_factor
-        print("shape of delta image: ",delta_image.shape )
-        print_image_array(delta_image)
+
 
 
 
 if __name__ == "__main__":
-    original_dataset_ = OriginalDataset(data_path="droid_100_sample_pictures")
-    original_dataset_ = OriginalDataset(data_path="droid_100_sample_pictures")
+    original_dataset_ = OriginalDataset(data_path="./datasets/droid_100_sample_pictures")
     img_0 = original_dataset_[0]
-    tensor_storage = TensorStorage(checkpoint=20,
     tensor_storage = TensorStorage(checkpoint=20,
                                    original_dataset=original_dataset_)
     for idx in range(len(original_dataset_)):
