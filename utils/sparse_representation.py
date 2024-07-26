@@ -25,8 +25,13 @@ class SparseRepresentation:
                     full_zero += 1
                 else:
                     sparse_matrix.append([row_idx, col_idx, r, g, b])
-        print(f"{full_zero = }")
+        # print(f"{full_zero = }")
         # print(f"{sparse_matrix = }")
+        item = sparse_matrix[0]
+        row_idx, col_idx, delta_value = item[0], item[1], [item[2], item[3], item[4]]
+        assert isinstance(row_idx, (float, int)), f"row_idx is not a float, received {row_idx} of type {type(row_idx)}"
+        assert isinstance(col_idx, (float, int))
+        assert isinstance(delta_value, list)
         # @todo there is an overflow error here when using , dtype=np.int8
         return np.array(sparse_matrix)
 
@@ -39,6 +44,9 @@ class SparseRepresentation:
         delta = np.zeros(shape=self.img_shape)
         for item in sparse_repr:
             row_idx, col_idx, delta_value = item[0], item[1], [item[2], item[3], item[4]]
+            assert isinstance(row_idx, float), f"row_idx is not a float, received {row_idx} of type {type(row_idx)}"
+            assert isinstance(col_idx, float)
+            assert isinstance(delta_value, list)
             delta[int(row_idx), int(col_idx)] = delta_value
         return delta
 

@@ -105,7 +105,7 @@ class TensorStorage(dict):
         elif self.encoding_scheme == "delta":
             # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
             out = self[ref_img_idx].astype(np.float64)
-            i = 1
+            i = ref_img_idx + 1
             while i < idx + 1:
                 out += self.sp.get_dense_representation(self[i])
                 i += 1
@@ -141,10 +141,11 @@ if __name__ == "__main__":
                                    original_dataset=original_dataset_,
                                    encoding_scheme="delta")
     # num_images = len(original_dataset_)
-    num_images = 3
+    num_images = 12
+    print(f"#### Compressing and storing {num_images} images #### ")
     for idx in range(num_images):
-        print(f"adding image#{idx + 1} to the tensor storage")
         tensor_storage.add()
+
     img_0 = tensor_storage.get_image(0)
     print(f'{img_0.shape = }')
     img_1_original = original_dataset_[1]
@@ -168,9 +169,11 @@ if __name__ == "__main__":
     # # print(f'{sp_mat[2316] = }, {len(sp_mat)}')
     # write_to_file(img_1_original, "img_1_original.txt")
     # write_to_file(img_1_tensor_storage, "img_1_tensor_storage.txt")
-
+    img11 = tensor_storage.get_image(11)
     for i in range(num_images):
-        assert np.array_equal(original_dataset_[i], tensor_storage.get_image(idx=i)),\
+        original_img = original_dataset_[i]
+        tensor_storage_img = tensor_storage.get_image(idx=i)
+        assert np.array_equal(original_img, tensor_storage_img),\
             f"The original image({i}) and reconstructed img({i}) dont match!"
 
 
