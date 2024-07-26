@@ -140,7 +140,7 @@ class TensorStorage(dict):
     def plot_modified_image(self, idx):
         delta_image = self.sp.get_dense_representation(self[idx])
         print("shape: ", delta_image.shape)
-        delta_image[delta_image != 0 ] *= self.enlarge_factor
+        delta_image[delta_image != 0] *= self.enlarge_factor
         plot_image_array(delta_image)
 
     def plot_white_pixels_image(self, idx):
@@ -149,20 +149,19 @@ class TensorStorage(dict):
         count = 0
         
         modified_image = np.zeros_like(delta_image)
-        
 
         for i in range(delta_image.shape[0]):
             for j in range(delta_image.shape[1]):
                 if not np.array_equal(delta_image[i, j], [0, 0, 0]):
                     modified_image[i, j] = [255, 255, 255]
-                    count +=1
+                    count += 1
         print('Non-Zero pixels count: ',count)
         plot_modified_image_array(modified_image,count)
 
-    def printImageArray(self,idx):
+    def printImageArray(self, idx):
         delta_image = self[idx]
         delta_image[delta_image != 0] *= self.enlarge_factor
-        print("shape of delta image: ",delta_image.shape )
+        print("shape of delta image: ", delta_image.shape)
         print_image_array(delta_image)
 
 
@@ -170,7 +169,7 @@ if __name__ == "__main__":
     original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures")
     tensor_storage = TensorStorage(checkpoint=10,
                                    original_dataset=original_dataset_,
-                                   encoding_scheme="FOR",
+                                   encoding_scheme="delta",
                                    enlarge_factor=10)
     # num_images = len(original_dataset_)
     num_images = 3
