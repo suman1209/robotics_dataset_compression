@@ -12,11 +12,18 @@ def get_storage(array: np.array) -> float:
     -------
 
     """
-    size = {"int8": 8, "uint8": 8}
+    size = {"int8": 8, "uint8": 8, "int64": 64, "float64": 64}
     dtype = str(array.dtype)
     if dtype not in size.keys():
         raise Exception(f"Unsupported storage type: {dtype}")
     return size[dtype] * len(array) / 1024
+
+
+def write_to_file(array, filename: str):
+    flattened_array = np.ndarray.flatten(array)
+    with open(filename, "w") as f:
+        for item in flattened_array:
+            f.write(str(item) + "\n")
 
 
 if __name__ == "__main__":
