@@ -4,12 +4,14 @@ from utils.utils import get_storage, write_to_file
 from utils.dataset_utils import (OriginalDataset,
                                  delta_between_images,
                                  plot_image_array,
-                                 plot_hist_array)
+                                 plot_hist_array,
+                                 print_image_array,
+                                 plot_modified_image_array)
 from utils.sparse_representation import SparseRepresentation as SP
 
 
 class TensorStorage(dict):
-    def __init__(self, checkpoint, original_dataset, encoding_scheme: str):
+    def __init__(self, checkpoint, original_dataset, encoding_scheme: str,enlarge_factor):
         """
         Parameters
         ----------
@@ -20,6 +22,7 @@ class TensorStorage(dict):
         self.checkpoint = checkpoint
         self.original_dataset = original_dataset
         self.encoding_scheme = encoding_scheme
+        self.enlarge_factor = enlarge_factor
 
     def add(self):
         """this function adds the data to the dictionary"""
@@ -134,12 +137,40 @@ class TensorStorage(dict):
         plt.plot(sparse_matrices_size)
         plt.show()
 
+    def plot_modified_image(self, idx):
+        delta_image = self.sp.get_dense_representation(self[idx])
+        print("shape: ", delta_image.shape)
+        delta_image[delta_image != 0] *= self.enlarge_factor
+        plot_image_array(delta_image)
+
+    def plot_white_pixels_image(self, idx):
+        delta_image = self.sp.get_dense_representation(self[idx])
+        print("shape: ", delta_image.shape)
+        count = 0
+        
+        modified_image = np.zeros_like(delta_image)
+
+        for i in range(delta_image.shape[0]):
+            for j in range(delta_image.shape[1]):
+                if not np.array_equal(delta_image[i, j], [0, 0, 0]):
+                    modified_image[i, j] = [255, 255, 255]
+                    count += 1
+        print('Non-Zero pixels count: ',count)
+        plot_modified_image_array(modified_image,count)
+
+    def printImageArray(self, idx):
+        delta_image = self[idx]
+        delta_image[delta_image != 0] *= self.enlarge_factor
+        print("shape of delta image: ", delta_image.shape)
+        print_image_array(delta_image)
+
 
 if __name__ == "__main__":
-    original_dataset_ = OriginalDataset(data_path="./datasets/droid_100_sample_pictures")
+    original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures")
     tensor_storage = TensorStorage(checkpoint=10,
                                    original_dataset=original_dataset_,
-                                   encoding_scheme="delta")
+                                   encoding_scheme="delta",
+                                   enlarge_factor=10)
     # num_images = len(original_dataset_)
     num_images = 12
     print(f"#### Compressing and storing {num_images} images #### ")
@@ -182,7 +213,12 @@ if __name__ == "__main__":
 
     # plot a decoded image
 
-    tensor_storage.plot_img(0)
-    tensor_storage.plot_hist(1)
+    # tensor_storage.plot_img(0)
+    # tensor_storage.plot_hist(1)
 
-    tensor_storage.plot_encoded_data_sizes()
+
+    tensor_storage.plot_modified_image(2)
+    tensor_storage.plot_white_pixels_image(2) #plots non-negative delta values replaced with white pixel values
+    # tensor_storage.printImageArray(1)
+
+    # tensor_storage.plot_encoded_data_sizes()

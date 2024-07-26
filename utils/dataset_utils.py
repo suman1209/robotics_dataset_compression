@@ -49,6 +49,14 @@ def plot_image_array(image_array: np.array, figsize=(10, 10)):
     plt.imshow(abs(image_array))
     plt.show()
 
+def plot_modified_image_array(image_array: np.array,pixel_count, figsize=(10, 10)):
+    total_pixels = image_array.shape[0] * image_array.shape[1]
+    title = ("image_array" + f"_{image_array.shape}" +
+             f"num_white_pixels(non[0, 0, 0])_{round((pixel_count/total_pixels)*100, 2)} %")
+    plt.figure(figsize=figsize)
+    plt.title(title)
+    plt.imshow(abs(image_array))
+    plt.show()
 
 def plot_hist_array(hist_array: np.array, figsize=(10, 10)):
     title = "hist_array" + f"_{hist_array.shape}"
@@ -58,6 +66,10 @@ def plot_hist_array(hist_array: np.array, figsize=(10, 10)):
     plt.hist(data, weights=np.ones(len(data)) / len(data))
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
     plt.show()
+
+def print_image_array(image_array:np.array):
+    print("image array:")
+    print(image_array)
 
 
 class OriginalDataset(VisionDataset):
