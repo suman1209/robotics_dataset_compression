@@ -27,27 +27,94 @@ class TensorStorage(dict):
     def add(self):
         """this function adds the data to the dictionary"""
         idx = len(self)
-        if idx % self.checkpoint == 0:
-            self[idx] = self.original_dataset[idx]
+        # special case where the checkpoint is zero
+        if self.checkpoint == 0:
+            if idx == 0:
+                self[idx] = self.original_dataset[idx]
+                return None
+            else:
+                ref_img_idx = 0
+                self.encode_img(idx, ref_img_idx)
         else:
-            """@todo here we need to perform some encoding and store the encoded tensor"""
-            ref_img = self[idx // self.checkpoint]
+            if idx % self.checkpoint == 0:
+                self[idx] = self.original_dataset[idx]
+            else:
+                ref_img_idx = (idx // self.checkpoint) * self.checkpoint
+                self.encode_img(idx, ref_img_idx)
+            return None
+
+    def encode_img(self, idx: int, ref_img_idx: int):
+        """Encoding"""
+        if self.encoding_scheme == "FOR":
+            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
+            ref_img = self[ref_img_idx]
             orig_img = self.original_dataset[idx]
             delta = delta_between_images(ref_img, orig_img)
-            # print(f"{delta = }")
-            # print(f"fraction of zero deltas: {np.count_nonzero(delta==0)/len(np.ndarray.flatten(delta)) = }")
-            self[idx] = delta
+            # store the sparse representation
+            self.sp = SP(delta.shape)
+            sparse_matrix = self.sp.get_sparse_representation(delta)
+            self[idx] = sparse_matrix
+            return
+        elif self.encoding_scheme == "delta":
+            # the reference image becomes the previous image
+            if idx == 1:
+                ref_img_idx_ = 0
+                ref_img = self[ref_img_idx_]
+                orig_img = self.original_dataset[idx]
+                delta = delta_between_images(ref_img, orig_img)
+                # store the sparse representation
+                self.sp = SP(delta.shape)
+                sparse_matrix = self.sp.get_sparse_representation(delta)
+                self[idx] = sparse_matrix
+                return
+            ref_img_idx_ = idx - 1
+            # Note that we want to decode the previous image everytime
+            ref_img = self.original_dataset[ref_img_idx_]
+            orig_img = self.original_dataset[idx]
+            delta = delta_between_images(ref_img, orig_img)
+            # store the sparse representation
+            self.sp = SP(delta.shape)
+            sparse_matrix = self.sp.get_sparse_representation(delta)
+            self[idx] = sparse_matrix
+        else:
+            raise Exception(f"Unknown encoding scheme: {self.encoding_scheme}")
 
     def get_image(self, idx):
         """Here we need to reconstruct the original image and also verify that it is correct by
         comparing to the original image in the original dataset"""
         assert idx < len(self), (f"Trying to access idx {idx} which is not available in the TensorStorage,"
                                  f"available indices are {self.keys()}")
-        if idx % self.checkpoint == 0:
-            return self[idx]
+        # special case where the checkpoint is 0
+        if self.checkpoint == 0:
+            if idx == 0:
+                return self[0]
+            else:
+                ref_img_idx = 0
+                return self.decompress_img(idx, ref_img_idx)
         else:
+            if idx % self.checkpoint == 0:
+                return self[idx]
+            else:
+                ref_img_idx = (idx // self.checkpoint) * self.checkpoint
+                out = self.decompress_img(idx, ref_img_idx)
+                return np.array(out, dtype=np.int64)
+
+    def decompress_img(self, idx, ref_img_idx):
+        """decoding"""
+        if self.encoding_scheme == "FOR":
             # print(f"{self[idx // self.checkpoint][0,0,-1]} + {self[idx][0,0,-1]}")
-            return self[idx // self.checkpoint] + self[idx]
+            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
+            out = self[ref_img_idx] + self.sp.get_dense_representation(self[idx])
+        elif self.encoding_scheme == "delta":
+            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
+            out = self[ref_img_idx].astype(np.float64)
+            i = 1
+            while i < idx + 1:
+                out += self.sp.get_dense_representation(self[i])
+                i += 1
+        else:
+            raise Exception(f"Unknown encoding scheme: {self.encoding_scheme}")
+        return out
 
     def get_size(self):
         total_size = 0
@@ -92,7 +159,6 @@ if __name__ == "__main__":
     ##print(tensor_storage)
     img_0 = tensor_storage.get_image(0)
     print(f'{img_0.shape = }')
-    img_1 = tensor_storage.get_image(1)
     img_1_original = original_dataset_[1]
     print(f"{img_1[0,0,-1] = }")
     print(f"{img_1_original[0,0,-1] = }")
