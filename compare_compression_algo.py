@@ -15,7 +15,7 @@ def generate_comparison_table(performance_data):
         orig_size = f"{orig_size:.3f}"
         comp_time = f"{comp_time:.3f}"
         decomp_time = f"{decomp_time:.3f}"
-        comp_ratio = f"{comp_ratio}"
+        comp_ratio = f"{comp_ratio:.3f}"
         table.add_row([method, comp_size, orig_size, comp_time, decomp_time, comp_ratio])
 
     return table
