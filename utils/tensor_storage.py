@@ -1,8 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from utils.utils import get_storage, write_to_file
-from utils.dataset_utils import (OriginalDataset,
-                                 delta_between_images,
+from utils.dataset_utils import (delta_between_images,
                                  plot_image_array,
                                  plot_hist_array,
                                  print_image_array,
@@ -11,7 +10,12 @@ from utils.sparse_representation import SparseRepresentation as SP
 
 
 class TensorStorage(dict):
-    def __init__(self, checkpoint, original_dataset, encoding_scheme: str, enlarge_factor):
+    def __init__(self, checkpoint,
+                 original_dataset,
+                 encoding_scheme: str,
+                 enlarge_factor: int,
+                 debug_mode: bool,
+                 offset: int):
         """
         Parameters
         ----------
@@ -23,6 +27,8 @@ class TensorStorage(dict):
         self.original_dataset = original_dataset
         self.encoding_scheme = encoding_scheme
         self.enlarge_factor = enlarge_factor
+        self.debug_mode = debug_mode
+        self.offset = offset
 
     def add(self):
         """this function adds the data to the dictionary"""
@@ -46,12 +52,11 @@ class TensorStorage(dict):
     def encode_img(self, idx: int, ref_img_idx: int):
         """Encoding"""
         if self.encoding_scheme == "FOR":
-            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
             ref_img = self[ref_img_idx]
             orig_img = self.original_dataset[idx]
-            delta = delta_between_images(ref_img, orig_img)
+            delta = delta_between_images(ref_img, orig_img, offset=self.offset)
             # store the sparse representation
-            self.sp = SP(delta.shape)
+            self.sp = SP(delta.shape, offset=self.offset)
             sparse_matrix = self.sp.get_sparse_representation(delta)
             self[idx] = sparse_matrix
             return
@@ -61,9 +66,11 @@ class TensorStorage(dict):
                 ref_img_idx_ = 0
                 ref_img = self[ref_img_idx_]
                 orig_img = self.original_dataset[idx]
-                delta = delta_between_images(ref_img, orig_img)
+                delta = delta_between_images(ref_img, orig_img, offset=self.offset)
+                # print(f"delta range: [{min(np.ndarray.flatten(delta))},"
+                #       f" {max(np.ndarray.flatten(delta))}]")
                 # store the sparse representation
-                self.sp = SP(delta.shape)
+                self.sp = SP(delta.shape, self.offset)
                 sparse_matrix = self.sp.get_sparse_representation(delta)
                 self[idx] = sparse_matrix
                 return
@@ -71,9 +78,11 @@ class TensorStorage(dict):
             # Note that we want to decode the previous image everytime
             ref_img = self.original_dataset[ref_img_idx_]
             orig_img = self.original_dataset[idx]
-            delta = delta_between_images(ref_img, orig_img)
+            delta = delta_between_images(ref_img, orig_img, offset=self.offset)
+            # print(f"delta range: [{min(np.ndarray.flatten(delta))},"
+            #       f" {max(np.ndarray.flatten(delta))}]")
             # store the sparse representation
-            self.sp = SP(delta.shape)
+            self.sp = SP(delta.shape, self.offset)
             sparse_matrix = self.sp.get_sparse_representation(delta)
             self[idx] = sparse_matrix
         else:
@@ -90,14 +99,14 @@ class TensorStorage(dict):
                 return self[0]
             else:
                 ref_img_idx = 0
-                return self.decompress_img(idx, ref_img_idx)
+                return np.array(self.decompress_img(idx, ref_img_idx), dtype=np.uint8)
         else:
             if idx % self.checkpoint == 0:
                 return self[idx]
             else:
                 ref_img_idx = (idx // self.checkpoint) * self.checkpoint
                 out = self.decompress_img(idx, ref_img_idx)
-                return np.array(out, dtype=np.int64)
+                return np.array(out, dtype=np.int8)
 
     def decompress_img(self, idx, ref_img_idx):
         """decoding"""
@@ -106,14 +115,20 @@ class TensorStorage(dict):
             # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
             out = self[ref_img_idx] + self.sp.get_dense_representation(self[idx])
         elif self.encoding_scheme == "delta":
-            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
             out = self[ref_img_idx].astype(np.float64)
             i = ref_img_idx + 1
             while i < idx + 1:
-                out += self.sp.get_dense_representation(self[i])
+                if self.debug_mode:
+                    if i < idx:
+                        out = self.original_dataset[i].astype(np.float64)
+                    else:
+                        out += self.sp.get_dense_representation(self[i])
+                else:
+                    out += self.sp.get_dense_representation(self[i])
                 i += 1
         else:
             raise Exception(f"Unknown encoding scheme: {self.encoding_scheme}")
+        assert out.shape == self[ref_img_idx].shape
         return out
 
     def get_size(self):
@@ -148,7 +163,7 @@ class TensorStorage(dict):
         total_pixel_count = delta_image.shape[0] * delta_image.shape[1]
         count = 0
 
-        modified_image = np.zeros_like(delta_image)
+        modified_image = np.zeros_like(delta_image, dtype=np.float32)
 
         for i in range(delta_image.shape[0]):
             for j in range(delta_image.shape[1]):

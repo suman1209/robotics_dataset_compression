@@ -9,7 +9,7 @@ from prettytable import PrettyTable
 
 def generate_comparison_table(performance_data):
     table = PrettyTable()
-    table.field_names = ["Compression Algo", "Compression Size (KB)", "Original Size (KB)", "Compression Time (s)", "Decompression Time (s)", "Compression Ratio"]
+    table.field_names = ["Compression Algo", "Compression Size (MB)", "Original Size (MB)", "Compression Time (s)", "Decompression Time (s)", "Compression Ratio"]
 
     for method, comp_size, orig_size, comp_time, decomp_time, comp_ratio in performance_data:
         comp_size = f"{comp_size:.3f}"
@@ -22,14 +22,21 @@ def generate_comparison_table(performance_data):
     return table
 
 
-def generate_results(original_dataset_, comp_algo_list, checkpoint, enlarge_factor, num_images):
+def generate_results(original_dataset_,
+                     comp_algo_list,
+                     checkpoint,
+                     enlarge_factor,
+                     num_images,
+                     debug_mode):
     performance_data = []
 
     for comp_algo in comp_algo_list:
         tensor_storage = TensorStorage(checkpoint=checkpoint,
                                        original_dataset=original_dataset_,
                                        encoding_scheme=comp_algo,
-                                       enlarge_factor=enlarge_factor)
+                                       enlarge_factor=enlarge_factor,
+                                       debug_mode=debug_mode,
+                                       offset=0)
         print(f"#### Compressing  using {comp_algo} and storing {num_images} images #### ")
         comp_start_time = time.time()
         for idx in range(num_images):
@@ -48,7 +55,7 @@ def generate_results(original_dataset_, comp_algo_list, checkpoint, enlarge_fact
         # print(f'Average Decompression Time of {comp_algo}: {total_decomp_time} ')
 
         comp_size = tensor_storage.get_size()
-        orig_size = original_dataset_.get_storage_size()
+        orig_size = original_dataset_.get_storage_size(num_images)
 
         # print(f"total size in KB of tensor storage: {comp_size}")
         # print(f"total size in KB of original dataset: {orig_size}")

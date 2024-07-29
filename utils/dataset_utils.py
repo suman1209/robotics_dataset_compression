@@ -7,23 +7,59 @@ import numpy as np
 from utils.utils import get_storage
 
 
-def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
+def create_rgb_col(col):
+    """This function is used to create the RGB column such that the values stay within the int8 range"""
+    assert len(col) == 3
+    r, g, b = col
+    r = process_rgb(r)
+    g = process_rgb(g)
+    b = process_rgb(b)
+    return [r, g, b]
+
+
+def process_rgb(value: int) -> list[int]:
+    """
+    given a number it returns a list of numbers which can be represented with 8 bits
+    e.g. 456 -> [255, 201]
+    e.g. 780 -> [255, 255, 255, 15]
+    """
+    result = []
+    num = value
+
+    threshold = 255
+    if num <= threshold:
+        # since at max the values can be 512, when the delta range is [-255, 255]
+        return num
+    while num > 255:
+        num = num - 255
+        result.append(255)
+    result.append(num)
+    return result
+
+
+def delta_between_images(ref_img: np.array, orig_img: np.array, offset) -> np.array:
     """This function calculates the difference between two rgb images"""
     assert ref_img.shape == orig_img.shape, (f"ref({ref_img.shape}) and"
                                              f" orig({orig_img.shape}) images must have the same shape")
     # TODO, need to debug why the orig18 and recon18 are not matching when the dtypes are set to int8
-    delta = np.zeros_like(ref_img, dtype=np.float32)
-    ref_img = ref_img.astype(np.float32)
-    orig_img = orig_img.astype(np.float32)
-    for i in range(3):
-        # print(f"{image1[:, :, i] = }")
-        # print(f"{image2[:, :, i] = }")
-        if orig_img[7, 194, 0] == 41:
-            pass
-        delta[:, :, i] = orig_img[:, :, i] - ref_img[:, :, i]
-        # print(f"{delta[:, :, i] = }")
-        # assert False
-    return delta
+    delta = orig_img - ref_img + np.ones_like(orig_img) * offset
+    # delta = np.zeros_like(ref_img, dtype=np.int8)
+    # ref_img = ref_img.astype(np.int8)
+    # orig_img = orig_img.astype(np.int8)
+    # for i in range(3):
+    #     # print(f"{image1[:, :, i] = }")
+    #     # print(f"{image2[:, :, i] = }")
+    #     if orig_img[7, 194, 0] == 41:
+    #         pass
+    #     delta[:, :, i] = orig_img[:, :, i] - ref_img[:, :, i] + np.ones_like(orig_img[:, :, i]) * 164
+
+    delta_processed = np.copy(delta)
+    for row_idx, row in enumerate(delta):
+        for col_idx, col in enumerate(row):
+            if min(col) > 255:
+                print(col)
+                delta_processed[row_idx, col_idx] = create_rgb_col(col)
+    return delta_processed
 
 
 def read_rgb_img(path) -> np.array:
@@ -51,7 +87,6 @@ def plot_image_array(image_array: np.array, figsize=(5, 5)):
 
 
 def plot_modified_image_array(image_array: np.array, pixel_count_percent, figsize=(5, 5)):
-    total_pixels = image_array.shape[0] * image_array.shape[1]
     title = ("image_array" + f"_{image_array.shape}" +
              f"\nnum_white_pixels(non[0, 0, 0])_{round(pixel_count_percent, 2)} %")
     plt.figure(figsize=figsize)
@@ -101,10 +136,10 @@ class OriginalDataset(VisionDataset):
     def __str__(self):
         return f"OriginalDataset({self.data_path})"
 
-    def get_storage_size(self):
+    def get_storage_size(self, num_images):
         "returns the total storage size of the dataset"
         total_storage = 0
-        for data in self:
+        for data in [self[i] for i in range(num_images)]:
             total_storage += get_storage(data)
         return total_storage
 
@@ -112,6 +147,10 @@ class OriginalDataset(VisionDataset):
 if __name__ == '__main__':
     original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures')
     len_ = (original_dataset.__len__())
+    num_images = len_
     print(len_)
-    storage_size = original_dataset.get_storage_size()
+    storage_size = original_dataset.get_storage_size(num_images)
     print(f"{storage_size = }")
+
+    value = 78
+    print(process_rgb(value))
