@@ -162,7 +162,7 @@ if __name__ == "__main__":
     original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures_grayscale")
     tensor_storage = TensorStorage(checkpoint=10,
                                    original_dataset=original_dataset_,
-                                   encoding_scheme="delta",
+                                   encoding_scheme="FOR",
                                    enlarge_factor=20)
     
     #num_images = len(original_dataset_)

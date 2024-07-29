@@ -237,12 +237,12 @@ class TensorStorage(dict):
 
 
 if __name__ == "__main__":
-    original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures")
+    original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures_grayscale")
     tensor_storage = TensorStorage(checkpoint=10,
                                    original_dataset=original_dataset_,
-                                   encoding_scheme="delta_of_deltas",
+                                   encoding_scheme="delta",
                                    enlarge_factor=20)
-    # num_images = len(original_dataset_)
+    #num_images = len(original_dataset_)
     num_images = 12
     print(f"#### Compressing and storing {num_images} images #### ")
     for idx in range(num_images):
