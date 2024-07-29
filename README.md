@@ -6,7 +6,7 @@ First clone the repo using:
 ```
 git clone https://github.com/suman1209/robotics_dataset_compression.git
 ```
-Open terminal and go to directory
+Open the terminal ( command prompt) and go to the directory
 ```
 cd robotics_dataset_compression
 ```
@@ -20,5 +20,13 @@ To run main.py
 ```
 python main.py
 ```
+To measure the performance of compression methods
+```
+python compare_compression_algo.py
+```
 
+## Results
 
+## Architecture
+
+## Future Works
