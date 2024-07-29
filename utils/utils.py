@@ -16,7 +16,7 @@ def get_storage(array: np.array) -> float:
     dtype = str(array.dtype)
     if dtype not in size.keys():
         raise Exception(f"Unsupported storage type: {dtype}")
-    return size[dtype] * len(array) / 1024
+    return size[dtype] * len(array) / (1024*8)
 
 
 def write_to_file(array, filename: str):
