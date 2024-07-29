@@ -28,5 +28,6 @@ python compare_compression_algo.py
 ## Results
 
 ## Architecture
+The system starts with a raw dataset, which is processed by the RDC tool to produce a compressed dataset. Within the tool, tensor storage is used to manage data, where an original dataset is parsed through an encoding scheme (such as FOR/DELTA). The tensor storage interacts with a sparse representation module, which can convert delta images into sparse representations and vice versa.
 ![Archiitecture of RDC](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/rdc_architecture.jpeg)
 ## Future Works
