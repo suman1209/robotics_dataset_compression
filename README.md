@@ -10,21 +10,14 @@ Open the terminal ( command prompt) and go to the directory
 ```
 cd robotics_dataset_compression
 ```
-
 Install required packages
 ```
 python -m pip install -r requirement.txt
 ```
-
-To run main.py
+To run main.py and measure the performance of compression methods
 ```
 python main.py
 ```
-To measure the performance of compression methods
-```
-python compare_compression_algo.py
-```
-
 ## Results
 
 ## Architecture
