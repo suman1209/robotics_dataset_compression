@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 
@@ -12,11 +14,36 @@ def get_storage(array: np.array) -> float:
     -------
 
     """
-    size = {"int8": 8, "uint8": 8, "int64": 64, "float64": 64}
-    dtype = str(array.dtype)
-    if dtype not in size.keys():
-        raise Exception(f"Unsupported storage type: {dtype}")
-    return size[dtype] * len(array) / (1024*8)
+    if isinstance(array, np.ndarray):
+        size = {"int8": 8, "uint8": 8, "int64": 64, "float64": 64}
+        dtype = str(array.dtype)
+        assert array.ndim == 3, f"Received array of shape: {array.shape}"
+        total_elements = array.shape[0] * array.shape[1] * array.shape[2]
+        if dtype not in size.keys():
+            raise Exception(f"Unsupported storage type: {dtype}")
+        return size[dtype] * total_elements / (1024 * 1024)
+
+    elif isinstance(array, list):
+        total_elements = 0
+        min_element = math.inf
+        for element in array:
+            for subelement in element:
+                if isinstance(subelement, (int, np.uint8, np.float32)):
+                    total_elements += 1
+                    if min_element > subelement:
+                        min_element = subelement
+                elif isinstance(subelement, list):
+                    total_elements += len(subelement)
+                    for subelement in subelement:
+                        if min_element > subelement:
+                            min_element = subelement
+                else:
+                    raise Exception(f"Unsupported storage type: {type(subelement)}")
+        assert min_element <= 255, f"value {min_element} does not fit within uint8"
+        return total_elements * 8 / (1024 * 1024)
+
+    else:
+        raise Exception(f"Unexpected storage type: {type(array)}")
 
 
 def write_to_file(array, filename: str):
