@@ -7,14 +7,15 @@ import numpy as np
 from utils.utils import get_storage
 
 
+
 def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
     """This function calculates the difference between two rgb images"""
     assert ref_img.shape == orig_img.shape, (f"ref({ref_img.shape}) and"
                                              f" orig({orig_img.shape}) images must have the same shape")
     # TODO, need to debug why the orig18 and recon18 are not matching when the dtypes are set to int8
-    delta = np.zeros_like(ref_img, dtype=np.float32)
-    ref_img = ref_img.astype(np.float32)
-    orig_img = orig_img.astype(np.float32)
+    delta = np.zeros_like(ref_img, dtype=np.float64)
+    ref_img = ref_img.astype(np.float64)
+    orig_img = orig_img.astype(np.float64)
     for i in range(3):
         # print(f"{image1[:, :, i] = }")
         # print(f"{image2[:, :, i] = }")
@@ -23,14 +24,23 @@ def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
         delta[:, :, i] = orig_img[:, :, i] - ref_img[:, :, i]
         # print(f"{delta[:, :, i] = }")
         # assert False
+    # print('inside delta function')
+    # total_non_zero_delta_vals = non_zero_deltas(delta)
+    # print(f"Non -zero values in Delta for is: {total_non_zero_delta_vals}")
+    # plot_delta_image_white_pixels(delta)
     return delta
 
 
+def new_delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
+    delta = ref_img - orig_img
+    non_zero_vals = non_zero_deltas(delta)
+    print(f'number of non-zero vals: {non_zero_vals}')
+    return delta
+
 def read_rgb_img(path) -> np.array:
     assert os.path.exists(path), "provided path does not exist!"
-    #bgr_img = cv2.imread(path, cv2.COLOR_BGR2RGB)
-    #rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
-    rgb_img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    bgr_img = cv2.imread(path, cv2.COLOR_BGR2RGB)
+    rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
     return rgb_img
 
 
@@ -72,6 +82,26 @@ def print_image_array(image_array:np.array):
     print("image array:")
     print(image_array)
 
+    
+def non_zero_deltas(delta_image):
+    count = 0
+    for i in range(delta_image.shape[0]):
+            for j in range(delta_image.shape[1]):
+                if not np.array_equal(delta_image[i, j], [0, 0, 0]):
+                    count += 1
+    return count
+
+def plot_delta_image_white_pixels(delta_image):
+    modified_image = np.zeros_like(delta_image)
+    count = 0
+    for i in range(delta_image.shape[0]):
+            for j in range(delta_image.shape[1]):
+                if not np.array_equal(delta_image[i, j], [0, 0, 0]):
+                    print(delta_image[i,j])
+                    modified_image[i, j] = [255, 255, 255]
+                    count += 1
+    print('Non-Zero pixels count: ',count)
+    plot_modified_image_array(modified_image,count)
 
 class OriginalDataset(VisionDataset):
     def __init__(self, data_path: str):
@@ -108,7 +138,7 @@ class OriginalDataset(VisionDataset):
 
 
 if __name__ == '__main__':
-    original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures_grayscale')
+    original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures')
     len_ = (original_dataset.__len__())
     print(len_)
     storage_size = original_dataset.get_storage_size()
