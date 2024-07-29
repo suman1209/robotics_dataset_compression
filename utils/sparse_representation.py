@@ -8,7 +8,7 @@ class SparseRepresentation:
     Sparse representation of a sparse matrix
     """
     @staticmethod
-    def get_sparse_representation(delta: np.array) -> np.array:
+    def get_sparse_representation(delta: np.array):
         """
          e.g. delta_image    : [[[0, -2, 0], [1, 0, 0]],
                                 [[0, 0, 0], [110, -50, 0]]]
@@ -33,7 +33,7 @@ class SparseRepresentation:
         assert isinstance(col_idx, (float, int))
         assert isinstance(delta_value, list)
         # @todo there is an overflow error here when using , dtype=np.int8
-        return np.array(sparse_matrix)
+        return sparse_matrix
 
     def get_dense_representation(self, sparse_repr):
         """
@@ -44,8 +44,8 @@ class SparseRepresentation:
         delta = np.zeros(shape=self.img_shape)
         for item in sparse_repr:
             row_idx, col_idx, delta_value = item[0], item[1], [item[2], item[3], item[4]]
-            assert isinstance(row_idx, float), f"row_idx is not a float, received {row_idx} of type {type(row_idx)}"
-            assert isinstance(col_idx, float)
+            assert isinstance(row_idx, int), f"row_idx is not a float, received {row_idx} of type {type(row_idx)}"
+            assert isinstance(col_idx, int)
             assert isinstance(delta_value, list)
             delta[int(row_idx), int(col_idx)] = delta_value
         return delta

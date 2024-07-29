@@ -101,10 +101,10 @@ class OriginalDataset(VisionDataset):
     def __str__(self):
         return f"OriginalDataset({self.data_path})"
 
-    def get_storage_size(self):
+    def get_storage_size(self, num_images):
         "returns the total storage size of the dataset"
         total_storage = 0
-        for data in self:
+        for data in [self[i] for i in range(num_images)]:
             total_storage += get_storage(data)
         return total_storage
 
