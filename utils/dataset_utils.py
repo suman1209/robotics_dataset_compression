@@ -28,8 +28,9 @@ def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
 
 def read_rgb_img(path) -> np.array:
     assert os.path.exists(path), "provided path does not exist!"
-    bgr_img = cv2.imread(path, cv2.COLOR_BGR2RGB)
-    rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+    #bgr_img = cv2.imread(path, cv2.COLOR_BGR2RGB)
+    #rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+    rgb_img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     return rgb_img
 
 
@@ -107,7 +108,7 @@ class OriginalDataset(VisionDataset):
 
 
 if __name__ == '__main__':
-    original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures')
+    original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures_grayscale')
     len_ = (original_dataset.__len__())
     print(len_)
     storage_size = original_dataset.get_storage_size()

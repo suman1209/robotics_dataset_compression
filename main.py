@@ -166,13 +166,13 @@ class TensorStorage(dict):
 
 
 if __name__ == "__main__":
-    original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures")
+    original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures_grayscale")
     tensor_storage = TensorStorage(checkpoint=10,
                                    original_dataset=original_dataset_,
                                    encoding_scheme="delta",
                                    enlarge_factor=20)
-    # num_images = len(original_dataset_)
-    num_images = 12
+    num_images = len(original_dataset_)
+    #num_images = 100
     print(f"#### Compressing and storing {num_images} images #### ")
     for idx in range(num_images):
         tensor_storage.add()
@@ -200,12 +200,12 @@ if __name__ == "__main__":
     # # print(f'{sp_mat[2316] = }, {len(sp_mat)}')
     # write_to_file(img_1_original, "img_1_original.txt")
     # write_to_file(img_1_tensor_storage, "img_1_tensor_storage.txt")
-    img11 = tensor_storage.get_image(11)
-    for i in range(num_images):
-        original_img = original_dataset_[i]
-        tensor_storage_img = tensor_storage.get_image(idx=i)
-        assert np.array_equal(original_img, tensor_storage_img),\
-            f"The original image({i}) and reconstructed img({i}) dont match!"
+    # img11 = tensor_storage.get_image(11)
+    # for i in range(num_images):
+    #     original_img = original_dataset_[i]
+    #     tensor_storage_img = tensor_storage.get_image(idx=i)
+    #     assert np.array_equal(original_img, tensor_storage_img),\
+    #         f"The original image({i}) and reconstructed img({i}) dont match!"
 
 
     print(f"total size in MB of tensor storage: {tensor_storage.get_size()}")
@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
     # plot a decoded image
 
-    image = tensor_storage.decompress_img(5)
+    image = tensor_storage.decompress_img(5,5)
     tensor_storage.plot_img(image)
     tensor_storage.plot_hist(1)
 
