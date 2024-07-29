@@ -21,8 +21,6 @@ def get_storage(array: np.array) -> float:
 
     if dtype not in size.keys():
         raise Exception(f"Unsupported storage type: {dtype}")
-    
-    # print(f"dtype size is {size[dtype]}")
     return size[dtype] * len(array) / (1024*8)
 
 

@@ -4,3 +4,4 @@ torchvision==0.17.0
 torch==2.2.0
 numpy==2.0.0
 prettytable==3.10.2
+tqdm==4.66.4
