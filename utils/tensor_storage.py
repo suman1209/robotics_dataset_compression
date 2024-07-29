@@ -145,7 +145,7 @@ class TensorStorage(dict):
 
     def plot_white_pixels_image(self, idx):
         delta_image = self.sp.get_dense_representation(self[idx])
-        print("shape: ", delta_image.shape)
+        total_pixel_count = delta_image.shape[0] * delta_image.shape[1]
         count = 0
 
         modified_image = np.zeros_like(delta_image)
@@ -155,8 +155,10 @@ class TensorStorage(dict):
                 if not np.array_equal(delta_image[i, j], [0, 0, 0]):
                     modified_image[i, j] = [255, 255, 255]
                     count += 1
-        print('Non-Zero pixels count: ', count)
-        plot_modified_image_array(modified_image, count)
+        # non_zero_pixel_count_percent
+        count_percent = (count / total_pixel_count) * 100
+        print(f"Non-Zero pixels percentage: {count_percent: .3f}")
+        plot_modified_image_array(modified_image, count_percent)
 
     def printImageArray(self, idx):
         delta_image = self[idx]

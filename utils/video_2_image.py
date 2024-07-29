@@ -27,7 +27,7 @@ class Video2Image:
                 print('error in opening video!')
                 break
             i += 1
-            if i == 99:
+            if i == 100:
                 break
         # Release everything if job is finished
         cap.release()

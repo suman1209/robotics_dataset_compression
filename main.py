@@ -20,12 +20,12 @@ if __name__ == "__main__":
                                    enlarge_factor=enlarge_factor)
     # num_images = len(original_dataset_)
 
-    print(f"# Compressing and storing {num_images} images #")
-    for idx in range(num_images):
+    msg1 = f"# Compressing and storing {num_images} images #"
+    for idx in tqdm(range(num_images), msg1):
         tensor_storage.add()
 
-    print(f"# Verifying the reconstructed image {num_images} images #")
-    for i in range(num_images):
+    msg2 = f"# Verifying the reconstructed image {num_images} images #"
+    for i in tqdm(range(num_images), msg2):
         original_img = original_dataset_[i]
         tensor_storage_img = tensor_storage.get_image(idx=i)
         assert np.array_equal(original_img, tensor_storage_img),\
