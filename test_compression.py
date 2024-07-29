@@ -6,10 +6,8 @@ from utils.dataset_utils import (OriginalDataset,
                                  plot_image_array,
                                  plot_hist_array,
                                  print_image_array,
-                                 plot_modified_image_array,
-                                 new_delta_between_images,
-                                 plot_delta_image_white_pixels,
-                                 non_zero_deltas)
+                                 plot_modified_image_array
+                                 )
 from utils.sparse_representation import SparseRepresentation as SP
 import time
 

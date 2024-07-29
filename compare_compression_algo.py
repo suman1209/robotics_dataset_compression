@@ -22,7 +22,7 @@ def generate_comparison_table(performance_data):
 
 
 if __name__ == "__main__":
-    original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures")
+    original_dataset_ = OriginalDataset(data_path="datasets/droid_100_sample_pictures_grayscale")
 
     comp_algo_list = ['FOR', 'delta']
     performance_data = []

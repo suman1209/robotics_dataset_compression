@@ -9,9 +9,8 @@ from utils.dataset_utils import (OriginalDataset,
                                  plot_modified_image_array)
 from utils.sparse_representation import SparseRepresentation as SP
 
-
 class TensorStorage(dict):
-    def __init__(self, checkpoint, original_dataset, encoding_scheme: str,enlarge_factor):
+    def __init__(self, checkpoint, original_dataset, encoding_scheme: str, enlarge_factor):
         """
         Parameters
         ----------
@@ -46,7 +45,6 @@ class TensorStorage(dict):
     def encode_img(self, idx: int, ref_img_idx: int):
         """Encoding"""
         if self.encoding_scheme == "FOR":
-            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
             ref_img = self[ref_img_idx]
             orig_img = self.original_dataset[idx]
             delta = delta_between_images(ref_img, orig_img)
@@ -54,9 +52,7 @@ class TensorStorage(dict):
             self.sp = SP(delta.shape)
             sparse_matrix = self.sp.get_sparse_representation(delta)
             self[idx] = sparse_matrix
-            return
         elif self.encoding_scheme == "delta":
-            # the reference image becomes the previous image
             if idx == 1:
                 ref_img_idx_ = 0
                 ref_img = self[ref_img_idx_]
@@ -102,11 +98,8 @@ class TensorStorage(dict):
     def decompress_img(self, idx, ref_img_idx):
         """decoding"""
         if self.encoding_scheme == "FOR":
-            # print(f"{self[idx // self.checkpoint][0,0,-1]} + {self[idx][0,0,-1]}")
-            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
             out = self[ref_img_idx] + self.sp.get_dense_representation(self[idx])
         elif self.encoding_scheme == "delta":
-            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
             out = self[ref_img_idx].astype(np.float64)
             i = ref_img_idx + 1
             while i < idx + 1:
@@ -171,8 +164,9 @@ if __name__ == "__main__":
                                    original_dataset=original_dataset_,
                                    encoding_scheme="delta",
                                    enlarge_factor=20)
-    num_images = len(original_dataset_)
-    #num_images = 100
+    
+    #num_images = len(original_dataset_)
+    num_images = 10
     print(f"#### Compressing and storing {num_images} images #### ")
     for idx in range(num_images):
         tensor_storage.add()
@@ -188,38 +182,12 @@ if __name__ == "__main__":
     print(f"{ref_img1[0,0] = }")
     print(f"{delta[0,0] = }")
 
-    # orig_img18 = original_dataset_[18]
-    # tensor_img18 = tensor_storage.get_image(18)
-    # ref_img_for_img18 = tensor_storage.get_image(10)
-    # delta = delta_between_images(ref_img_for_img18, orig_img18)
-    # print(f"{ref_img_for_img18[7,194] = }")
-    # print(f"{orig_img18[7,194] = }")
-    # print(f"{tensor_img18[7,194] = }")
-    # print(f"{delta[7,194] = }")
-    # sp_mat = tensor_storage[1]
-    # # print(f'{sp_mat[2316] = }, {len(sp_mat)}')
-    # write_to_file(img_1_original, "img_1_original.txt")
-    # write_to_file(img_1_tensor_storage, "img_1_tensor_storage.txt")
-    # img11 = tensor_storage.get_image(11)
-    # for i in range(num_images):
-    #     original_img = original_dataset_[i]
-    #     tensor_storage_img = tensor_storage.get_image(idx=i)
-    #     assert np.array_equal(original_img, tensor_storage_img),\
-    #         f"The original image({i}) and reconstructed img({i}) dont match!"
-
-
     print(f"total size in MB of tensor storage: {tensor_storage.get_size()}")
     print(f"total size in MB of original dataset: {original_dataset_.get_storage_size()}")
-
+    image_idx = idx  # Replace with the correct index you intend to use
+    
     # plot a decoded image
-
     image = tensor_storage.decompress_img(5,5)
-    tensor_storage.plot_img(image)
+    tensor_storage.plot_img(image_idx)
     tensor_storage.plot_hist(1)
-
-
-    #tensor_storage.plot_modified_image(2)
-    #tensor_storage.plot_white_pixels_image(2) #plots non-negative delta values replaced with white pixel values
-    # tensor_storage.printImageArray(1)
-
     tensor_storage.plot_encoded_data_sizes()
