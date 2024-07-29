@@ -28,5 +28,5 @@ python compare_compression_algo.py
 ## Results
 
 ## Architecture
-
+![Archiitecture of RDC](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/rdc_architecture.jpeg)
 ## Future Works
