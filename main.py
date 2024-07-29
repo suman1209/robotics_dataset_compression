@@ -2,7 +2,7 @@ import numpy as np
 from utils.dataset_utils import OriginalDataset
 from utils.compare_compression_algo import generate_results
 from utils.tensor_storage import TensorStorage
-
+from tqdm import tqdm
 
 if __name__ == "__main__":
     # initial configurations
