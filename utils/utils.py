@@ -12,11 +12,18 @@ def get_storage(array: np.array) -> float:
     -------
 
     """
-    size = {"int8": 8, "uint8": 8, "int64": 64, "float64": 64}
+    size = {"int8": 8, "uint8": 8, "int16": 16, "uint16": 16, "int32": 32, "uint32": 32, "int64": 64, "float32": 32, "float64": 64}
     dtype = str(array.dtype)
+    # print(dtype)
+
+    # print(f"array shape is: {array.shape}")
+    # print(f"size of {dtype} is {array.dtype.itemsize} bytes")
+
     if dtype not in size.keys():
         raise Exception(f"Unsupported storage type: {dtype}")
-    return size[dtype] * len(array) / 1024
+    
+    # print(f"dtype size is {size[dtype]}")
+    return size[dtype] * len(array) / (1024*8)
 
 
 def write_to_file(array, filename: str):
