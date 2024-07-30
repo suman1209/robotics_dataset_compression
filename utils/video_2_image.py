@@ -1,42 +1,36 @@
+import cv2
 import os
 
-import cv2
-
-
 class Video2Image:
-    """This is a utility class to convert a video into an image."""
+    """This is a utility class to convert a video into images."""
+    
     def __init__(self, video_path):
         self.video_path = video_path
 
     def save_images(self, directory: str):
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         cap = cv2.VideoCapture(self.video_path)
+        if not cap.isOpened():
+            print(f"Error: Could not open video {self.video_path}")
+            return
 
-        # Define the codec and create VideoWriter object
-        # fourcc = cv2.VideoWriter_fourcc(*'XVID')
         i = 0
-        while (cap.isOpened()):
-            filename = f"{directory}/idx_{i}.png"
-            assert os.path.exists(directory), f"Directory doesn't exist {directory}"
+        while cap.isOpened():
             ret, frame = cap.read()
-            if ret == True:
-                # write the flipped frame
-                cv2.imwrite(filename, frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-            else:
-                print('error in opening video!')
-                break
-            i += 1
-            if i == 100:
-                break
-        # Release everything if job is finished
-        cap.release()
+            if not ret:
+                break  # Exit loop if no frame is captured
 
+            filename = os.path.join(directory, f"frame_{i:04d}.png")
+            cv2.imwrite(filename, frame)
+            i += 1
+
+        cap.release()
+        cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    video_path = "../datasets/2023-01-23-01_14_55_color_image3.mp4"
+    video_path = "/home/priyam/UTN/Cloud Database/cdb/mygeneratedvideo_sorted.avi"
     vd = Video2Image(video_path)
-    vd.save_images(directory='../datasets/dataset2')
-
-
-
+    vd.save_images(directory='/home/priyam/UTN/Cloud Database/cdb/mygeneratedvidoe_sorted_frames')
