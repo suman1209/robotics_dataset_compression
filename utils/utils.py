@@ -17,8 +17,11 @@ def get_storage(array: np.array) -> float:
     if isinstance(array, np.ndarray):
         size = {"int8": 8, "uint8": 8, "int64": 64, "float64": 64}
         dtype = str(array.dtype)
-        assert array.ndim == 3, f"Received array of shape: {array.shape}"
-        total_elements = array.shape[0] * array.shape[1] * array.shape[2]
+        assert array.ndim == 3 or array.ndim == 2, f"Received array of shape: {array.shape}"
+        if array.ndim == 3:
+            total_elements = array.shape[0] * array.shape[1] * array.shape[2]
+        else:
+            total_elements = array.shape[0] * array.shape[1]
         if dtype not in size.keys():
             raise Exception(f"Unsupported storage type: {dtype}")
         return size[dtype] * total_elements / (1024 * 1024)
@@ -55,13 +58,13 @@ def convert_images_to_grayscale(input_folder, output_folder):
 
         if os.path.isfile(file_path) and file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):          
             img = cv2.imread(file_path)
-            gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+            gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            print(f"{gray_img.shape = }")
+            assert False
             output_file_path = os.path.join(output_folder, filename)
             cv2.imwrite(output_file_path, gray_img)
 
             print(f"Converted {filename} to grayscale and saved to {output_file_path}")
-
-
 
 
 def write_to_file(array, filename: str):
@@ -72,10 +75,10 @@ def write_to_file(array, filename: str):
 
 
 if __name__ == "__main__":
-    test_tensor = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], dtype=np.int8)
-    storage_size = get_storage(test_tensor)
-    print(f"{storage_size = } mB")
-    input_folder = 'datasets/droid_100_sample_pictures'
-    output_folder = 'datasets/grayscale_droid_100_sample_pictures'
+    # test_tensor = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], dtype=np.int8)
+    # storage_size = get_storage(test_tensor)
+    # print(f"{storage_size = } mB")
+    input_folder = '../datasets/droid_100_sample_pictures'
+    output_folder = '../datasets/grayscale_droid_100_sample_pictures_test'
 
     convert_images_to_grayscale(input_folder, output_folder)
