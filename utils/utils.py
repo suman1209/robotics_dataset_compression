@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import os
 
+
 def get_storage(array: np.array) -> float:
     """
     Returns the storage size in (mB) of an array

@@ -11,7 +11,9 @@ from utils.sparse_representation import SparseRepresentation as SP
 
 
 class TensorStorage(dict):
-    def __init__(self, checkpoint, original_dataset, encoding_scheme: str, enlarge_factor):
+    def __init__(self, checkpoint, original_dataset,
+                 encoding_scheme: str, enlarge_factor,
+                 color: bool):
         """
         Parameters
         ----------
@@ -23,6 +25,7 @@ class TensorStorage(dict):
         self.original_dataset = original_dataset
         self.encoding_scheme = encoding_scheme
         self.enlarge_factor = enlarge_factor
+        self.color = color
 
     def add(self):
         """this function adds the data to the dictionary"""
@@ -49,10 +52,13 @@ class TensorStorage(dict):
             # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
             ref_img = self[ref_img_idx]
             orig_img = self.original_dataset[idx]
-            delta = delta_between_images(ref_img, orig_img)
+            delta = delta_between_images(ref_img, orig_img, color=self.color)
             # store the sparse representation
             self.sp = SP(delta.shape)
-            sparse_matrix = self.sp.get_sparse_representation(delta)
+            if self.color:
+                sparse_matrix = self.sp.get_sparse_representation(delta)
+            else:
+                sparse_matrix = self.sp.get_sparse_representation_gray(delta)
             self[idx] = sparse_matrix
             return
         elif self.encoding_scheme == "delta":
@@ -61,20 +67,26 @@ class TensorStorage(dict):
                 ref_img_idx_ = 0
                 ref_img = self[ref_img_idx_]
                 orig_img = self.original_dataset[idx]
-                delta = delta_between_images(ref_img, orig_img)
+                delta = delta_between_images(ref_img, orig_img, color=self.color)
                 # store the sparse representation
                 self.sp = SP(delta.shape)
-                sparse_matrix = self.sp.get_sparse_representation(delta)
+                if self.color:
+                    sparse_matrix = self.sp.get_sparse_representation(delta)
+                else:
+                    sparse_matrix = self.sp.get_sparse_representation_gray(delta)
                 self[idx] = sparse_matrix
                 return
             ref_img_idx_ = idx - 1
             # Note that we want to decode the previous image everytime
             ref_img = self.original_dataset[ref_img_idx_]
             orig_img = self.original_dataset[idx]
-            delta = delta_between_images(ref_img, orig_img)
+            delta = delta_between_images(ref_img, orig_img, color=self.color)
             # store the sparse representation
             self.sp = SP(delta.shape)
-            sparse_matrix = self.sp.get_sparse_representation(delta)
+            if self.color:
+                sparse_matrix = self.sp.get_sparse_representation(delta)
+            else:
+                sparse_matrix = self.sp.get_sparse_representation_gray(delta)
             self[idx] = sparse_matrix
         else:
             raise Exception(f"Unknown encoding scheme: {self.encoding_scheme}")
@@ -104,13 +116,20 @@ class TensorStorage(dict):
         if self.encoding_scheme == "FOR":
             # print(f"{self[idx // self.checkpoint][0,0,-1]} + {self[idx][0,0,-1]}")
             # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
-            out = self[ref_img_idx] + self.sp.get_dense_representation(self[idx])
+            if self.color:
+                out = self[ref_img_idx] + self.sp.get_dense_representation(self[idx])
+            else:
+                out = self[ref_img_idx] + self.sp.get_dense_representation_gray(self[idx])
+
         elif self.encoding_scheme == "delta":
-            # ref_img_idx = (idx // self.checkpoint) * self.checkpoint
+
             out = self[ref_img_idx].astype(np.float64)
             i = ref_img_idx + 1
             while i < idx + 1:
-                out += self.sp.get_dense_representation(self[i])
+                if self.color:
+                    out += self.sp.get_dense_representation(self[i])
+                else:
+                    out += self.sp.get_dense_representation_gray(self[i])
                 i += 1
         else:
             raise Exception(f"Unknown encoding scheme: {self.encoding_scheme}")
@@ -144,7 +163,10 @@ class TensorStorage(dict):
         plot_image_array(delta_image)
 
     def plot_white_pixels_image(self, idx):
-        delta_image = self.sp.get_dense_representation(self[idx])
+        if self.color:
+            delta_image = self.sp.get_dense_representation(self[idx])
+        else:
+            delta_image = self.sp.get_dense_representation_gray(self[idx])
         total_pixel_count = delta_image.shape[0] * delta_image.shape[1]
         count = 0
 
@@ -152,9 +174,14 @@ class TensorStorage(dict):
 
         for i in range(delta_image.shape[0]):
             for j in range(delta_image.shape[1]):
-                if not np.array_equal(delta_image[i, j], [0, 0, 0]):
-                    modified_image[i, j] = [255, 255, 255]
-                    count += 1
+                if self.color:
+                    if not np.array_equal(delta_image[i, j], [0, 0, 0]):
+                        modified_image[i, j] = [255, 255, 255]
+                        count += 1
+                else:
+                    if not delta_image[i, j] == 0:
+                        modified_image[i, j] = 255
+                        count += 1
         # non_zero_pixel_count_percent
         count_percent = (count / total_pixel_count) * 100
         print(f"Non-Zero pixels percentage: {count_percent: .3f}")

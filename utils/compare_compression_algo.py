@@ -26,14 +26,16 @@ def generate_results(original_dataset_,
                      comp_algo_list,
                      checkpoint,
                      enlarge_factor,
-                     num_images):
+                     num_images,
+                     color):
     performance_data = []
 
     for comp_algo in comp_algo_list:
         tensor_storage = TensorStorage(checkpoint=checkpoint,
                                        original_dataset=original_dataset_,
                                        encoding_scheme=comp_algo,
-                                       enlarge_factor=enlarge_factor)
+                                       enlarge_factor=enlarge_factor,
+                                       color=color)
         print(f"#### Compressing  using {comp_algo} and storing {num_images} images #### ")
         comp_start_time = time.time()
         for idx in range(num_images):
