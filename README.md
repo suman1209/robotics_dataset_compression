@@ -19,8 +19,14 @@ To run main.py and measure the performance of compression methods
 python main.py
 ```
 ## Results
+Performance of our compression algo on Dataset 1
+![Dataset 1 Results](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/dataset1.png)
+
+Performance of our compression algo on Dataset 1 converted to gray scale
+![Dataset 1 gs Results](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/dataset1_gs.png) 
+
 
 ## Architecture
-The system starts with a raw dataset, which is processed by the RDC tool to produce a compressed dataset. Within the tool, tensor storage is used to manage data, where an original dataset is parsed through an encoding scheme (such as FOR/DELTA). The tensor storage interacts with a sparse representation module, which can convert delta images into sparse representations and vice versa.
+In this architecture, we first load the dataset. Then, the dataset is parsed by the RDC tool. In this tool, we compress original data using one of the encoding schemes (FOR, delta). Then, we use the decompression method for the same encoding scheme to reconstruct the original data. 
 ![Archiitecture of RDC](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/rdc_architecture.jpeg)
 ## Future Works
