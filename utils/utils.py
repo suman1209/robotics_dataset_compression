@@ -1,7 +1,7 @@
 import math
-
 import numpy as np
-
+import cv2
+import os
 
 def get_storage(array: np.array) -> float:
     """
@@ -46,6 +46,24 @@ def get_storage(array: np.array) -> float:
         raise Exception(f"Unexpected storage type: {type(array)}")
 
 
+def convert_images_to_grayscale(input_folder, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    for filename in os.listdir(input_folder):
+        file_path = os.path.join(input_folder, filename)
+
+        if os.path.isfile(file_path) and file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):          
+            img = cv2.imread(file_path)
+            gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+            output_file_path = os.path.join(output_folder, filename)
+            cv2.imwrite(output_file_path, gray_img)
+
+            print(f"Converted {filename} to grayscale and saved to {output_file_path}")
+
+
+
+
 def write_to_file(array, filename: str):
     flattened_array = np.ndarray.flatten(array)
     with open(filename, "w") as f:
@@ -57,3 +75,7 @@ if __name__ == "__main__":
     test_tensor = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], dtype=np.int8)
     storage_size = get_storage(test_tensor)
     print(f"{storage_size = } mB")
+    input_folder = 'datasets/droid_100_sample_pictures'
+    output_folder = 'datasets/grayscale_droid_100_sample_pictures'
+
+    convert_images_to_grayscale(input_folder, output_folder)
