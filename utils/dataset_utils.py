@@ -7,7 +7,9 @@ import numpy as np
 from utils.utils import get_storage
 
 
-def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
+def delta_between_images(ref_img: np.array,
+                         orig_img: np.array,
+                         color: bool = True) -> np.array:
     """This function calculates the difference between two rgb images"""
     assert ref_img.shape == orig_img.shape, (f"ref({ref_img.shape}) and"
                                              f" orig({orig_img.shape}) images must have the same shape")
@@ -15,22 +17,24 @@ def delta_between_images(ref_img: np.array, orig_img: np.array) -> np.array:
     delta = np.zeros_like(ref_img, dtype=np.float32)
     ref_img = ref_img.astype(np.float32)
     orig_img = orig_img.astype(np.float32)
-    for i in range(3):
-        # print(f"{image1[:, :, i] = }")
-        # print(f"{image2[:, :, i] = }")
-        if orig_img[7, 194, 0] == 41:
-            pass
-        delta[:, :, i] = orig_img[:, :, i] - ref_img[:, :, i]
-        # print(f"{delta[:, :, i] = }")
-        # assert False
+
+    if color:
+        for i in range(3):
+            delta[:, :, i] = orig_img[:, :, i] - ref_img[:, :, i]
+    else:
+        delta = orig_img - ref_img
     return delta
 
 
-def read_rgb_img(path) -> np.array:
+def read_img(path, color: bool) -> np.array:
     assert os.path.exists(path), "provided path does not exist!"
-    bgr_img = cv2.imread(path, cv2.COLOR_BGR2RGB)
-    rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
-    return rgb_img
+    if color:
+        bgr_img = cv2.imread(path, cv2.COLOR_BGR2RGB)
+        img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+    else:
+        img = cv2.imread(path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return img
 
 
 def plot_image(image_path, figsize=(5, 5)):
@@ -56,7 +60,7 @@ def plot_modified_image_array(image_array: np.array, pixel_count_percent, figsiz
              f"\nnum_white_pixels(non[0, 0, 0])_{round(pixel_count_percent, 2)} %")
     plt.figure(figsize=figsize)
     plt.title(title)
-    plt.imshow(abs(image_array))
+    plt.imshow(abs(image_array), cmap='gray')
     plt.show()
 
 
@@ -76,9 +80,10 @@ def print_image_array(image_array:np.array):
 
 
 class OriginalDataset(VisionDataset):
-    def __init__(self, data_path: str):
+    def __init__(self, data_path: str, color: bool):
         super(OriginalDataset, self).__init__()
         self.data_path = data_path
+        self.color = color
 
     def __getitem__(self, idx: int) -> np.array:
         """
@@ -91,7 +96,7 @@ class OriginalDataset(VisionDataset):
         # the img_file_path existence check
         img_path = f'{self.data_path}/idx_{idx}.png'
         assert os.path.exists(img_path), f"Invalid img_path: {img_path} in {self.data_path}"
-        img = read_rgb_img(img_path)
+        img = read_img(img_path, self.color)
         return img
 
     def __len__(self) -> int:
