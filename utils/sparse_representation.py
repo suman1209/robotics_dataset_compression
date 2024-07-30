@@ -50,7 +50,21 @@ class SparseRepresentation:
             delta[int(row_idx), int(col_idx)] = delta_value
         return delta
 
+    def get_sparse_representation_gray(delta: np.array) -> np.array:
+        sparse_matrix = []
+        for row_idx, row in enumerate(delta):
+            for col_idx, value in enumerate(row):
+                if value != 0:
+                    sparse_matrix.append((row_idx, col_idx, value))
+        return np.array(sparse_matrix)
 
+    def get_dense_representation_gray(self, sparse_repr: np.array) -> np.array:
+        delta = np.zeros(shape=self.img_shape, dtype=np.float32)
+        for item in sparse_repr:
+            row_idx, col_idx, delta_value = item
+            # Ensure row_idx and col_idx are integers
+            delta[int(row_idx), int(col_idx)] = delta_value
+        return delta
 if __name__ == "__main__":
     # test_case 1
     delta_img_ = np.array([[[0, -2, 0], [1, 0, 0]], [[0, 0, 0], [110, -50, 0]]], dtype=np.int8)
