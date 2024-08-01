@@ -22,11 +22,17 @@ python main.py
 Performance of our compression algo on Dataset 1
 ![Dataset 1 Results](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/dataset1.png)
 
-Performance of our compression algo on Dataset 1 converted to gray scale
+Performance of our compression algo on Dataset 1 converted to grayscale
 ![Dataset 1 gs Results](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/dataset1_gs.png) 
 
 
+Performance of our compression algo on Dataset 2
+![Dataset 2 Results](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/result_d2.png)
+
 ## Architecture
-In this architecture, we first load the dataset. Then, the dataset is parsed by the RDC tool. In this tool, we compress original data using one of the encoding schemes (FOR, delta). Then, we use the decompression method for the same encoding scheme to reconstruct the original data. 
+In this architecture, First, we load the dataset. Then, the dataset is parsed by the RDC tool. In this tool, First, we compress original data using one of the encoding schemes (FOR, delta). Then we convert it to a sparse representation. To reconstruct the image, we decompress the data using decoding of the applied encoding scheme.
 ![Archiitecture of RDC](https://github.com/suman1209/robotics_dataset_compression/blob/akash/datasets/Results/rdc_architecture.jpeg)
 ## Future Works
+ - Improving current compression algorithm (for both RGB and Grayscale Datasets)
+ - Trying different encoding techniques
+ - Testing our compression algorithm on different datasets
