@@ -65,8 +65,14 @@ def plot_modified_image_array(image_array: np.array, pixel_count_percent, figsiz
 
 
 def plot_hist_array(hist_array: np.array, figsize=(5, 5)):
-    title = "hist_array" + f"_{hist_array.shape}"
-    data = np.ndarray.flatten(hist_array.flatten())
+    data = []
+    for element in hist_array:
+        for subelement in element[2:]:
+            if np.array_equal(element[2:], np.array([0, 0, 0])):
+                data.append(0)
+            else:
+                data.append(5)
+    title = "hist_array" + f"_{len(data)}"
     plt.figure(figsize=figsize)
     plt.title(title)
     plt.hist(data, weights=np.ones(len(data)) / len(data))
@@ -80,7 +86,7 @@ def print_image_array(image_array:np.array):
 
 
 class OriginalDataset(VisionDataset):
-    def __init__(self, data_path: str, color: bool):
+    def __init__(self, data_path: str, color: bool=True):
         super(OriginalDataset, self).__init__()
         self.data_path = data_path
         self.color = color
@@ -113,6 +119,21 @@ class OriginalDataset(VisionDataset):
             total_storage += get_storage(data)
         return total_storage
 
+def plot_delta(delta_image, color=True):
+    count = 0
+    modified_image = np.zeros((delta_image.shape[0], delta_image.shape[1]), dtype=np.uint8)
+
+    for i in range(delta_image.shape[0]):
+        for j in range(delta_image.shape[1]):
+            if color:
+                if not np.array_equal(delta_image[i, j], [0, 0, 0]):
+                    modified_image[i, j] = 1
+                    count += 1
+            else:
+                if not delta_image[i, j] == 0:
+                    modified_image[i, j] = 1
+                    count += 1
+    return count, modified_image
 
 if __name__ == '__main__':
     original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures')
