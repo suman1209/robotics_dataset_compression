@@ -133,7 +133,8 @@ def plot_delta(delta_image, color=True):
                 if not delta_image[i, j] == 0:
                     modified_image[i, j] = 1
                     count += 1
-    return count, modified_image
+            pass
+    return count, modified_image.T
 
 if __name__ == '__main__':
     original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures')
