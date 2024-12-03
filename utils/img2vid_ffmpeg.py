@@ -7,7 +7,7 @@ def get_img2vid_size(data_path, fps=30, out_dir="./temp/", delete_tmp=True, imag
 
     img_size_list = [os.path.getsize(os.path.join(data_path, img)) for img in os.listdir(data_path) if img.endswith(".png")]
 
-    total_img_size = sum(img_size_list) / 10** 6
+    total_img_size = sum(img_size_list) / 2 ** 20
 
     # os.system(f"ffmpeg -f image2 -framerate {fps} -i {dataset_path}{image_format} -c:v libx265 {out_dir}output.mp4")
     # os.system(f"ffmpeg -f image2 -framerate {fps} -i {dataset_path}{image_format} -c:v libx264 -preset veryslow -qp 0 {out_dir}output_lossless_h264.avi")
@@ -18,10 +18,10 @@ def get_img2vid_size(data_path, fps=30, out_dir="./temp/", delete_tmp=True, imag
     os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx265 -preset veryslow -x265-params lossless=1 {os.path.join(out_dir, 'output_lossless_h265_slow.mp4')}")
 
     # os.system("""ffmpeg -framerate 30 -i image_%03d.png -f yuv4mpegpipe -pix_fmt yuv420p - | vvc_encoder_app -c lossless.cfg -i - -o output_lossless_h266.bin""")
-    h264_slow_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h264_slow.mkv")) / 10** 6
-    h264_fast_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h264_fast.mkv")) / 10** 6
-    h265_slow_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h265_slow.mp4")) / 10** 6
-    h265_fast_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h265_fast.mp4")) / 10** 6
+    h264_slow_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h264_slow.mkv")) / 2 ** 20
+    h264_fast_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h264_fast.mkv")) / 2 ** 20
+    h265_slow_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h265_slow.mp4")) / 2 ** 20
+    h265_fast_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h265_fast.mp4")) / 2 ** 20
 
     if delete_tmp:
         os.system(f"rm -r {out_dir}")
