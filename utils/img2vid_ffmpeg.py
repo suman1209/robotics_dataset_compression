@@ -1,6 +1,6 @@
 import os
 
-def get_img2vid_size(data_path, fps=30, out_dir="./tmp/", delete_tmp=True, image_format="idx_%d.png"):
+def get_img2vid_size(data_path, fps=30, out_dir="./temp/", delete_tmp=True, image_format="frame_%d.png"):
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -30,11 +30,11 @@ def get_img2vid_size(data_path, fps=30, out_dir="./tmp/", delete_tmp=True, image
         # os.system(f"rm {os.path.join(out_dir, "output_lossless_h265_slow.mp4")}")
         # os.system(f"rm {os.path.join(out_dir, "output_lossless_h265_fast.mp4")}")
 
-    print(f"{total_img_size=}")
-    print(f"{h264_slow_size=}")
-    print(f"{h264_fast_size=}")
-    print(f"{h265_slow_size=}")
-    print(f"{h265_fast_size=}")
+    print(f"{total_img_size / 10** 6=}")
+    print(f"{h264_slow_size / 10** 6=}")
+    print(f"{h264_fast_size / 10** 6=}")
+    print(f"{h265_slow_size / 10** 6=}")
+    print(f"{h265_fast_size / 10** 6=}")
     return {
         "total_img_size": total_img_size,
         "h264_slow_size": h264_slow_size,
@@ -45,7 +45,9 @@ def get_img2vid_size(data_path, fps=30, out_dir="./tmp/", delete_tmp=True, image
 
 
 if __name__ == "__main__":
-    ori_order = get_img2vid_size("./datasets/droid_100_sample_pictures/")
-    reorder = get_img2vid_size("./datasets/droid_100_sample_pictures_reorder/", image_format="idx_new_%d.png", delete_tmp=False)
-    print(f"{ori_order=}")
-    print(f"{reorder=}")
+    # ori_order = get_img2vid_size("./datasets/droid_100_sample_pictures/")
+    # reorder = get_img2vid_size("./datasets/droid_100_sample_pictures_reorder/", image_format="idx_new_%d.png", delete_tmp=False)
+    # print(f"{ori_order=}")
+    # print(f"{reorder=}")
+
+    ori_order = get_img2vid_size("/home/suman/Desktop/robotics_dataset_compression/datasets/chips_droid/")
