@@ -1,8 +1,7 @@
 import os
 
-def get_img2vid_size(data_path, fps=30, out_dir="./tmp/", delete_tmp=True):
+def get_img2vid_size(data_path, fps=30, out_dir="./tmp/", delete_tmp=True, image_format="idx_%d.png"):
 
-    image_format = """idx_%d.png"""
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
@@ -46,4 +45,7 @@ def get_img2vid_size(data_path, fps=30, out_dir="./tmp/", delete_tmp=True):
 
 
 if __name__ == "__main__":
-    get_img2vid_size("./datasets/droid_100_sample_pictures/")
+    ori_order = get_img2vid_size("./datasets/droid_100_sample_pictures/")
+    reorder = get_img2vid_size("./datasets/droid_100_sample_pictures_reorder/", image_format="idx_new_%d.png", delete_tmp=False)
+    print(f"{ori_order=}")
+    print(f"{reorder=}")
