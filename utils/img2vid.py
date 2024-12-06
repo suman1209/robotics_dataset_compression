@@ -2,7 +2,7 @@ import os
 import numpy as np
 from utils.dataset_utils import OriginalDataset
 
-def get_img2vid_size(data_path, fps=30, out_dir="./temp/", delete_tmp=True, image_format="frame_%d.png", only_h264_fast=False):
+def get_img2vid_size(data_path, fps=30, out_dir="./temp/", delete_tmp=True, image_format="frame_%d.png", only_h264_slow=False):
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -11,15 +11,15 @@ def get_img2vid_size(data_path, fps=30, out_dir="./temp/", delete_tmp=True, imag
 
     total_img_size = sum(img_size_list) / 2 ** 20
 
-    if only_h264_fast:
-        os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx264 -preset veryslow -qp 0 {os.path.join(out_dir, 'output_lossless_h264_slow.mp4 -loglevel panic')}")
+    if only_h264_slow:
+        os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx264rgb -preset veryslow -qp 0 {os.path.join(out_dir, 'output_lossless_h264_slow.mkv -loglevel panic')}")
     else:
-        os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx264 -preset ultrafast -qp 0 {os.path.join(out_dir, 'output_lossless_h264_fast.mp4 -loglevel panic')}")
-        os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx264 -preset veryslow -qp 0 {os.path.join(out_dir, 'output_lossless_h264_slow.mp4 -loglevel panic')}")
+        os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx264rgb -preset ultrafast -qp 0 {os.path.join(out_dir, 'output_lossless_h264_fast.mkv -loglevel panic')}")
+        os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx264rgb -preset veryslow -qp 0 {os.path.join(out_dir, 'output_lossless_h264_slow.mkv -loglevel panic')}")
         os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx265 -preset ultrafast -x265-params lossless=1 {os.path.join(out_dir, 'output_lossless_h265_fast.mp4 -loglevel panic')}")
         os.system(f"ffmpeg -f image2 -framerate {fps} -i {os.path.join(data_path, image_format)} -c:v libx265 -preset veryslow -x265-params lossless=1 {os.path.join(out_dir, 'output_lossless_h265_slow.mp4 -loglevel panic')}")
 
-    if only_h264_fast:
+    if only_h264_slow:
         h264_slow_size = os.path.getsize(os.path.join(out_dir, "output_lossless_h264_slow.mkv")) / 2 ** 20
         h264_fast_size = 0
         h265_slow_size = 0
