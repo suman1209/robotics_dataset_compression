@@ -1,7 +1,8 @@
 import sys  
-sys.path.insert(1, './')
+sys.path.insert(1, '../')
 # from utils.dataset_utils import OriginalDataset
 import torch
+import math
 
 import os
 from utils.dataset_utils import read_img, get_storage
@@ -83,16 +84,21 @@ class CNNAutoencoder(nn.Module):
         super(CNNAutoencoder, self).__init__()
         
         self.encoder = nn.Sequential(
+            # nn.Conv2d(3, 8, kernel_size=3, stride=2, padding=1),
+            # nn.ReLU(True),
+            # nn.Conv2d(8, 16, kernel_size=3, stride=2, padding=1),
+            # nn.ReLU(True),
+            # nn.Conv2d(16, 8, kernel_size=7),
+            nn.Conv2d(3, 16, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(16, 32, kernel_size=7, stride=2, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(32, 3, kernel_size=7),
             # nn.Conv2d(3, 16, kernel_size=5, stride=2, padding=1),
             # nn.ReLU(True),
             # nn.Conv2d(16, 32, kernel_size=7, stride=2, padding=1),
             # nn.ReLU(True),
             # nn.Conv2d(32, 32, kernel_size=11),
-            nn.Conv2d(3, 8, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(True),
-            nn.Conv2d(8, 16, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(True),
-            nn.Conv2d(16, 8, kernel_size=7)
             # nn.ReLU(True),
             # nn.Conv2d(32, 16, kernel_size=7),
             # nn.ReLU(True),
@@ -100,6 +106,16 @@ class CNNAutoencoder(nn.Module):
         )
         
         self.decoder = nn.Sequential(
+            # nn.ConvTranspose2d(8, 16, kernel_size=7),
+            # nn.ReLU(True),
+            # nn.ConvTranspose2d(16, 8, kernel_size=3, stride=2, padding=1, output_padding=1),
+            # nn.ReLU(True),
+            # nn.ConvTranspose2d(8, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ConvTranspose2d(3, 32, kernel_size=7),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(32, 16, kernel_size=7, stride=2, padding=1, output_padding=1),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(16, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
             # nn.ConvTranspose2d(8, 16, kernel_size=5),
             # nn.ReLU(True),
             # nn.ConvTranspose2d(16, 32, kernel_size=7),
@@ -109,12 +125,6 @@ class CNNAutoencoder(nn.Module):
             # nn.ConvTranspose2d(32, 16, kernel_size=7, stride=2, padding=1),
             # nn.ReLU(True),
             # nn.ConvTranspose2d(16, 3, kernel_size=5, stride=2, padding=1),
-
-            nn.ConvTranspose2d(8, 16, kernel_size=7),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(16, 8, kernel_size=3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(8, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
             # nn.Sigmoid()
         )
         
@@ -127,12 +137,12 @@ class CNNAutoencoder(nn.Module):
         return x
     
     def test(self, x):
-        x = self.encoder(x)
-        print(x.size())
-        x = self.decoder(x)
+        x_hid = self.encoder(x)
+        print(f"{x_hid.size()=}")
+        x = self.decoder(x_hid)
         # x = x * 255.0
         # x = x.clamp(-255, 255)
-        return x
+        return x, x_hid
     
     def fit(self, original_dataset, checkpoint=None):
         if checkpoint is None:
