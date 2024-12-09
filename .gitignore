@@ -2,3 +2,4 @@
 datasets/
 *.pyc
 research/extracted_frames_video_0/
+checkpoints/
