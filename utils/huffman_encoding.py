@@ -57,3 +57,14 @@ def build_huffman_tree(freq_dict):
 
 def generate_huffman_codes(tree_root):
     return huffman_code_tree(tree_root)
+
+def get_huffman_codes(freq, extar_bits=0):
+    root = build_huffman_tree(freq)
+    huffmanCode = generate_huffman_codes(root)
+
+    sorted_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+    encoded_bits = 0
+    for (char, frequency) in sorted_freq:
+        print(f"Character: {char:>3}, Code: {huffmanCode[char]:>17}, Length of Code: {len(huffmanCode[char]):>2}, Frequency: {frequency:>5}")
+        encoded_bits += ((len(huffmanCode[char])+extar_bits) * frequency)
+    return root, huffmanCode, encoded_bits

@@ -2,7 +2,6 @@ import sys
 sys.path.insert(1, '../')
 # from utils.dataset_utils import OriginalDataset
 import torch
-import math
 
 import os
 from utils.dataset_utils import read_img, get_storage
@@ -14,6 +13,7 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 from torchvision.datasets import MNIST
+import math
     
     
 def load_model(checkpoint=None, train=True):
@@ -65,6 +65,7 @@ class OriginalDataset(VisionDataset):
         return norm_value(img1)
 
     def __len__(self) -> int:
+        # file_list = os.listdir(self.data_path)
         dirpath, dir_names, files = next(os.walk(self.data_path))
         # return len([i for i in files if "resize" not in i]) - 1
         return len([i for i in files if "resize" not in i])
@@ -89,16 +90,16 @@ class CNNAutoencoder(nn.Module):
             # nn.Conv2d(8, 16, kernel_size=3, stride=2, padding=1),
             # nn.ReLU(True),
             # nn.Conv2d(16, 8, kernel_size=7),
-            nn.Conv2d(3, 16, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(True),
-            nn.Conv2d(16, 32, kernel_size=7, stride=2, padding=1),
-            nn.ReLU(True),
-            nn.Conv2d(32, 3, kernel_size=7),
-            # nn.Conv2d(3, 16, kernel_size=5, stride=2, padding=1),
+            # nn.Conv2d(3, 16, kernel_size=3, stride=2, padding=1),
             # nn.ReLU(True),
             # nn.Conv2d(16, 32, kernel_size=7, stride=2, padding=1),
             # nn.ReLU(True),
-            # nn.Conv2d(32, 32, kernel_size=11),
+            # nn.Conv2d(32, 3, kernel_size=7),
+            nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(32, 64, kernel_size=7, stride=2, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(64, 64, kernel_size=7)
             # nn.ReLU(True),
             # nn.Conv2d(32, 16, kernel_size=7),
             # nn.ReLU(True),
@@ -111,20 +112,16 @@ class CNNAutoencoder(nn.Module):
             # nn.ConvTranspose2d(16, 8, kernel_size=3, stride=2, padding=1, output_padding=1),
             # nn.ReLU(True),
             # nn.ConvTranspose2d(8, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
-            nn.ConvTranspose2d(3, 32, kernel_size=7),
+            # nn.ConvTranspose2d(3, 32, kernel_size=7),
+            # nn.ReLU(True),
+            # nn.ConvTranspose2d(32, 16, kernel_size=7, stride=2, padding=1, output_padding=1),
+            # nn.ReLU(True),
+            # nn.ConvTranspose2d(16, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ConvTranspose2d(64, 64, kernel_size=7),
             nn.ReLU(True),
-            nn.ConvTranspose2d(32, 16, kernel_size=7, stride=2, padding=1, output_padding=1),
+            nn.ConvTranspose2d(64, 32, kernel_size=7, stride=2, padding=1, output_padding=1),
             nn.ReLU(True),
-            nn.ConvTranspose2d(16, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
-            # nn.ConvTranspose2d(8, 16, kernel_size=5),
-            # nn.ReLU(True),
-            # nn.ConvTranspose2d(16, 32, kernel_size=7),
-            # nn.ReLU(True),
-            # nn.ConvTranspose2d(32, 32, kernel_size=11),
-            # nn.ReLU(True),
-            # nn.ConvTranspose2d(32, 16, kernel_size=7, stride=2, padding=1),
-            # nn.ReLU(True),
-            # nn.ConvTranspose2d(16, 3, kernel_size=5, stride=2, padding=1),
+            nn.ConvTranspose2d(32, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
             # nn.Sigmoid()
         )
         
@@ -144,7 +141,7 @@ class CNNAutoencoder(nn.Module):
         # x = x.clamp(-255, 255)
         return x, x_hid
     
-    def fit(self, original_dataset, checkpoint=None):
+    def fit(self, original_dataset, checkpoint=None, epochs=20000):
         if checkpoint is None:
             model = self
         else:
@@ -152,13 +149,16 @@ class CNNAutoencoder(nn.Module):
             model = self
             model.load_state_dict(torch.load(checkpoint, weights_only=True))
         model.train()
-        num_epochs = 50
-        train_loader = torch.utils.data.DataLoader(original_dataset, batch_size=4, shuffle=True)
-        model = self
+        num_epochs = epochs
+        train_loader = torch.utils.data.DataLoader(original_dataset, batch_size=64, shuffle=True)
+        # model = self
         criterion = nn.MSELoss()
-        optimizer = optim.AdamW(model.parameters(), lr=0.001)
+        optimizer = optim.AdamW(model.parameters(), lr=0.0004)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=200, factor=0.5, threshold=0.0000001)
         lowest_epoch_loss = math.inf
+        best_model = None
         for epoch in range(num_epochs):
+            PATH = f"../checkpoints/lowest_loss_ae_{epoch}.pt"
             loss_epoch = 0
             for data in train_loader:
                 img = data.permute(0, 3, 1, 2)
@@ -170,58 +170,20 @@ class CNNAutoencoder(nn.Module):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            print(f'Epoch [{epoch+1:>2}/{num_epochs}], Loss: {loss_epoch/len(train_loader):.6f}')
             if loss_epoch < lowest_epoch_loss:
-                "we save the checkpoint with the lowest loss"
-                torch.save(model.state_dict(), "../checkpoints/lowest_loss_ae.pt")
+                # "we save the checkpoint with the lowest loss"
+                best_model = self
+            if epoch % 1000 == 0 and epoch >= 1000:
+                torch.save(best_model.state_dict(), PATH)
+            scheduler.step(loss_epoch/len(train_loader))
+            print(f'Epoch [{epoch+1:>2}/{num_epochs}], Loss: {(loss_epoch/len(train_loader)):.8f}, LR: {scheduler.get_last_lr()}, Best: {scheduler.best:.8f}')
 
         print("Finish")
         
 if __name__ == "__main__":
-    original_dataset = OriginalDataset('./datasets/droid_100_sample_pictures')
+    original_dataset = OriginalDataset('../datasets/droid_100_sample_pictures')
     len_ = (original_dataset.__len__())
     print(len_)
-
-    original_dataset[0].shape
-
-
-
-    train_loader = torch.utils.data.DataLoader(original_dataset, batch_size=4, shuffle=True)
-
-    model = load_model(checkpoint="./checkpoints/autoencoder_4000.pt")
-    criterion = nn.MSELoss()
-    optimizer = optim.AdamW(model.parameters(), lr=0.001)
-
-    num_epochs = 25000
-    for epoch in range(num_epochs):
-        PATH = f"./checkpoints/autoencoder_{epoch+5000}.pt"
-        loss_epoch = 0
-        for data in train_loader:
-            img = data.permute(0, 3, 1, 2)
-            output = model(img)
-            # print(output.size(), img.size())
-            loss = criterion(output, img)
-            loss_epoch += loss.item()
-            
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-        if epoch % 1000 == 0 and epoch >= 1000:
-            torch.save(model.state_dict(), PATH)
-        
-        print(f'Epoch [{epoch+1:>2}/{num_epochs}], Loss: {loss_epoch/len(train_loader):.6f}')
-
-    print("Finish")
-
-    import matplotlib.pyplot as plt
-    test_image = next(iter(train_loader))[:1]
-    with torch.no_grad():
-        reconstructed = model.test(test_image.permute(0, 3, 1, 2)).permute(0, 2, 3, 1)
-
-    print(denorm_value(test_image[0][0][0]))
-    print(denorm_value(reconstructed[0][0][0]))
-    fig, axes = plt.subplots(1, 2, figsize=(15, 3))
-    axes[0].imshow(denorm_value(test_image.squeeze()))
-    axes[0].axis('off')
-    axes[1].imshow(denorm_value(reconstructed.squeeze()))
-    axes[1].axis('off')
+    model = CNNAutoencoder()
+    model.fit(original_dataset, checkpoint='../checkpoints/lowest_loss_ae_1000.pt')
+    # model.fit(original_dataset)
